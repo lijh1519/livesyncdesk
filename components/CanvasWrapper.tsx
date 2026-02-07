@@ -1,8 +1,6 @@
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { Tldraw, Editor, createShapeId, TLRecord, TLStoreSnapshot, createTLStore, defaultShapeUtils, throttle } from 'tldraw';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
+import { Tldraw, Editor, createShapeId, TLRecord, throttle } from 'tldraw';
 import { useRoom, useOthers, useUpdateMyPresence, useBroadcastEvent, useEventListener } from '../liveblocks.config';
-import { LiveblocksYjsProvider } from '@liveblocks/yjs';
-import * as Y from 'yjs';
 
 interface CanvasWrapperProps {
   onEditorMount: (editor: Editor) => void;
@@ -50,129 +48,66 @@ function Cursors() {
 }
 
 export const CanvasWrapper: React.FC<CanvasWrapperProps> = ({ onEditorMount }) => {
-  const room = useRoom();
   const updateMyPresence = useUpdateMyPresence();
   const broadcast = useBroadcastEvent();
   const [editor, setEditor] = useState<Editor | null>(null);
-  const [isReady, setIsReady] = useState(false);
+  const syncingRef = useRef(false);
+  const initRef = useRef(false);
 
-  // 创建 Yjs 文档和 Provider
-  const { yDoc, yProvider, yRecords } = useMemo(() => {
-    const doc = new Y.Doc();
-    const provider = new LiveblocksYjsProvider(room, doc);
-    const records = doc.getMap<TLRecord>('tldraw-records');
-    return { yDoc: doc, yProvider: provider, yRecords: records };
-  }, [room]);
-
-  // 监听 Yjs 变化，同步到 tldraw
-  useEffect(() => {
-    if (!editor || !yRecords) return;
-
-    let isRemoteUpdate = false;
-
-    // Yjs -> tldraw
-    const handleYjsChange = () => {
-      if (isRemoteUpdate) return;
-      isRemoteUpdate = true;
-      
-      const allRecords: TLRecord[] = [];
-      yRecords.forEach((value) => {
-        allRecords.push(value);
-      });
-      
-      // 获取当前 store 中的所有 records
-      const currentRecords = editor.store.allRecords();
-      const currentIds = new Set(currentRecords.map(r => r.id));
-      const yIds = new Set(allRecords.map(r => r.id));
-      
-      // 添加或更新 records
-      const toAdd: TLRecord[] = [];
-      allRecords.forEach(record => {
-        const existing = editor.store.get(record.id);
-        if (!existing || JSON.stringify(existing) !== JSON.stringify(record)) {
-          toAdd.push(record);
-        }
-      });
-      
-      // 删除不存在于 Yjs 中的 records
-      const toRemove: TLRecord['id'][] = [];
-      currentRecords.forEach(record => {
-        // 不删除系统 records
-        if (record.typeName === 'page' || record.typeName === 'document' || record.typeName === 'instance' || record.typeName === 'camera' || record.typeName === 'pointer') return;
-        if (!yIds.has(record.id)) {
-          toRemove.push(record.id);
-        }
-      });
-      
-      if (toAdd.length > 0 || toRemove.length > 0) {
-        editor.store.mergeRemoteChanges(() => {
-          if (toAdd.length > 0) {
-            editor.store.put(toAdd);
-          }
-          if (toRemove.length > 0) {
-            editor.store.remove(toRemove);
-          }
-        });
-      }
-      
-      isRemoteUpdate = false;
-    };
-
-    yRecords.observe(handleYjsChange);
+  // 监听远程广播事件
+  useEventListener(({ event }) => {
+    if (!editor || syncingRef.current) return;
     
-    // 初始同步
-    handleYjsChange();
+    const e = event as any;
+    if (e.type === 'SHAPE_UPDATE') {
+      syncingRef.current = true;
+      try {
+        const { shapes, deletedIds } = e;
+        
+        if (shapes && shapes.length > 0) {
+          editor.store.mergeRemoteChanges(() => {
+            editor.store.put(shapes);
+          });
+        }
+        
+        if (deletedIds && deletedIds.length > 0) {
+          editor.store.mergeRemoteChanges(() => {
+            editor.store.remove(deletedIds);
+          });
+        }
+      } catch (err) {
+        console.warn('Remote sync error:', err);
+      }
+      syncingRef.current = false;
+    }
+  });
 
-    return () => {
-      yRecords.unobserve(handleYjsChange);
-    };
-  }, [editor, yRecords]);
-
-  // 监听 tldraw 变化，同步到 Yjs
+  // 监听本地变化并广播
   useEffect(() => {
-    if (!editor || !yRecords) return;
+    if (!editor) return;
 
     const handleStoreChange = throttle(() => {
-      const allRecords = editor.store.allRecords();
+      if (syncingRef.current) return;
       
-      yDoc.transact(() => {
-        // 同步 shapes 和相关 records
-        allRecords.forEach(record => {
-          // 只同步 shape 类型的 records
-          if (record.typeName === 'shape') {
-            const existing = yRecords.get(record.id);
-            if (!existing || JSON.stringify(existing) !== JSON.stringify(record)) {
-              yRecords.set(record.id, record);
-            }
-          }
-        });
+      try {
+        const allShapes = editor.store.allRecords().filter(r => r.typeName === 'shape');
         
-        // 删除已不存在的 shapes
-        const currentIds = new Set(allRecords.filter(r => r.typeName === 'shape').map(r => r.id));
-        const keysToDelete: string[] = [];
-        yRecords.forEach((_, key) => {
-          if (!currentIds.has(key as any)) {
-            keysToDelete.push(key);
-          }
-        });
-        keysToDelete.forEach(key => yRecords.delete(key));
-      });
-    }, 50);
+        broadcast({
+          type: 'SHAPE_UPDATE',
+          shapes: allShapes,
+          deletedIds: [],
+        } as any);
+      } catch (err) {
+        console.warn('Broadcast error:', err);
+      }
+    }, 200);
 
     const unsubscribe = editor.store.listen(handleStoreChange, { scope: 'document', source: 'user' });
 
     return () => {
       unsubscribe();
     };
-  }, [editor, yRecords, yDoc]);
-
-  // 清理
-  useEffect(() => {
-    return () => {
-      yProvider.destroy();
-      yDoc.destroy();
-    };
-  }, [yDoc, yProvider]);
+  }, [editor, broadcast]);
 
   const handleMount = useCallback((editorInstance: Editor) => {
     // 设置浅色主题
@@ -189,68 +124,76 @@ export const CanvasWrapper: React.FC<CanvasWrapperProps> = ({ onEditorMount }) =
     
     editorInstance.setCamera({ x: 0, y: 0, z: 1 });
 
-    // 初始化示例数据（仅当画布为空时）
-    setTimeout(() => {
-      if (editorInstance.getCurrentPageShapes().length === 0 && yRecords.size === 0) {
-        editorInstance.createShape({
-          id: createShapeId('n1'),
-          type: 'note',
-          x: 150,
-          y: 140,
-          rotation: -0.05,
-          props: {
-            color: 'yellow',
-            text: 'Define core user personas for the MVP launch 🚀',
-          }
-        });
+    // 初始化示例数据（仅当画布为空且未初始化时）
+    if (!initRef.current) {
+      initRef.current = true;
+      
+      setTimeout(() => {
+        try {
+          const shapes = editorInstance.getCurrentPageShapes();
+          if (shapes.length === 0) {
+            editorInstance.createShape({
+              id: createShapeId('n1'),
+              type: 'note',
+              x: 150,
+              y: 140,
+              rotation: -0.05,
+              props: {
+                color: 'yellow',
+                text: 'Define core user personas for the MVP launch 🚀',
+              }
+            });
 
-        editorInstance.createShape({
-          id: createShapeId('n2'),
-          type: 'note',
-          x: 520,
-          y: 200,
-          rotation: 0.08,
-          props: {
-            color: 'blue',
-            text: 'Integration with existing API endpoints?',
-          }
-        });
+            editorInstance.createShape({
+              id: createShapeId('n2'),
+              type: 'note',
+              x: 520,
+              y: 200,
+              rotation: 0.08,
+              props: {
+                color: 'blue',
+                text: 'Integration with existing API endpoints?',
+              }
+            });
 
-        editorInstance.createShape({
-          id: createShapeId('img1'),
-          type: 'geo',
-          x: 280,
-          y: 320,
-          rotation: 0.02,
-          props: {
-            w: 400,
-            h: 300,
-            geo: 'rectangle',
-            color: 'grey',
-            text: 'Mobile Navigation V2\n(Reference Image)',
-            fill: 'pattern',
-          }
-        });
+            editorInstance.createShape({
+              id: createShapeId('img1'),
+              type: 'geo',
+              x: 280,
+              y: 320,
+              rotation: 0.02,
+              props: {
+                w: 400,
+                h: 300,
+                geo: 'rectangle',
+                color: 'grey',
+                text: 'Mobile Navigation V2\n(Reference Image)',
+                fill: 'pattern',
+              }
+            });
 
-        editorInstance.createShape({
-          id: createShapeId('arrow1'),
-          type: 'arrow',
-          x: 350,
-          y: 180,
-          props: {
-            start: { x: 0, y: 0 },
-            end: { x: 200, y: 50 },
-            dash: 'dashed',
-            color: 'grey',
+            editorInstance.createShape({
+              id: createShapeId('arrow1'),
+              type: 'arrow',
+              x: 350,
+              y: 180,
+              props: {
+                start: { x: 0, y: 0 },
+                end: { x: 200, y: 50 },
+                dash: 'dashed',
+                color: 'grey',
+              }
+            });
           }
-        });
-      }
-      setIsReady(true);
-    }, 500);
+        } catch (err) {
+          console.warn('Init shapes error:', err);
+        }
+      }, 300);
+    }
 
     setEditor(editorInstance);
     onEditorMount(editorInstance);
-  }, [onEditorMount, yRecords]);
+  }, [onEditorMount]);
 
   // 光标追踪
   const handlePointerMove = (e: React.PointerEvent) => {
