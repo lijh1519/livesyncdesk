@@ -1,0 +1,5 @@
+{
+  "name": "LiveSyncDesk",
+  "description": "A collaborative whiteboard application featuring a glassmorphic UI, real-time user presence, and floating toolbars.",
+  "requestFramePermissions": []
+}
