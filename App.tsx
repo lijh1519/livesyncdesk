@@ -203,31 +203,31 @@ function EditorContent({ roomId }: { roomId: string }) {
     <div className="relative w-full h-screen bg-bg-light bg-dot-pattern overflow-hidden text-slate-900 selection:bg-blue-100 font-sans">
       
       {/* Top Navigation Bar */}
-      <header className="absolute top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between pointer-events-none">
+      <header className="absolute top-0 left-0 right-0 z-50 px-3 sm:px-6 py-2 sm:py-4 flex items-center justify-between pointer-events-none">
         {/* Left Side: Back & Title */}
-        <div className="flex items-center gap-4 pointer-events-auto">
-          <button className="flex items-center justify-center w-10 h-10 rounded-xl glass-panel text-slate-600 hover:text-slate-900 hover:bg-white shadow-sm transition-all">
-            <ArrowLeft size={20} />
+        <div className="flex items-center gap-2 sm:gap-4 pointer-events-auto">
+          <button className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl glass-panel text-slate-600 hover:text-slate-900 hover:bg-white shadow-sm transition-all">
+            <ArrowLeft size={18} className="sm:w-5 sm:h-5" />
           </button>
           
           <div className="flex flex-col">
-            <h1 className="text-base font-bold text-slate-900 leading-tight drop-shadow-sm">Q3 Brainstorming</h1>
+            <h1 className="text-sm sm:text-base font-bold text-slate-900 leading-tight drop-shadow-sm truncate max-w-[120px] sm:max-w-none">Q3 Brainstorming</h1>
             <ConnectionStatus />
           </div>
         </div>
 
         {/* Right Side: Avatars & Share */}
-        <div className="flex items-center gap-4 pointer-events-auto">
-          <div className="glass-panel px-2 py-1.5 rounded-full shadow-sm">
+        <div className="flex items-center gap-2 sm:gap-4 pointer-events-auto">
+          <div className="glass-panel px-1.5 sm:px-2 py-1 sm:py-1.5 rounded-full shadow-sm hidden xs:block">
             <LiveAvatarGroup />
           </div>
           
           <button 
             onClick={handleShare}
-            className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 font-semibold text-sm"
+            className="flex items-center gap-1.5 sm:gap-2 bg-primary hover:bg-primary-hover text-white px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 font-semibold text-xs sm:text-sm"
           >
-            {copied ? <Check size={16} strokeWidth={2.5} /> : <Share size={16} strokeWidth={2.5} />}
-            <span>{copied ? 'Copied!' : 'Share'}</span>
+            {copied ? <Check size={14} strokeWidth={2.5} /> : <Share size={14} strokeWidth={2.5} />}
+            <span className="hidden sm:inline">{copied ? 'Copied!' : 'Share'}</span>
           </button>
         </div>
       </header>

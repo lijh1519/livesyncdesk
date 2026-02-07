@@ -66,11 +66,11 @@ export const FollowMeToggle: React.FC<FollowMeToggleProps> = ({ editor }) => {
   const followableUsers = others.filter(o => o.presence?.name);
 
   return (
-    <div className="absolute bottom-8 left-8 z-50">
+    <div className="absolute bottom-20 sm:bottom-8 left-3 sm:left-8 z-50">
       {/* 主按钮 */}
       <button 
         onClick={handleToggle}
-        className={`flex items-center gap-2.5 px-5 py-3 rounded-2xl shadow-float glass-panel transition-all duration-300 ${
+        className={`flex items-center gap-1.5 sm:gap-2.5 px-3 sm:px-5 py-2 sm:py-3 rounded-xl sm:rounded-2xl shadow-float glass-panel transition-all duration-300 ${
           isActive 
             ? 'bg-primary/90 text-white border-primary shadow-blue-500/25 ring-2 ring-blue-500/20' 
             : followingUserId
@@ -79,14 +79,14 @@ export const FollowMeToggle: React.FC<FollowMeToggleProps> = ({ editor }) => {
         }`}
       >
         <div className={`relative flex items-center justify-center transition-transform duration-300 ${isActive ? 'scale-110' : ''}`}>
-          <User size={20} strokeWidth={2} className={isActive || followingUserId ? 'fill-white/20' : 'fill-slate-400/20'} />
+          <User size={16} className="sm:w-5 sm:h-5" strokeWidth={2} />
         </div>
-        <span className="font-semibold text-sm tracking-wide">
+        <span className="font-semibold text-xs sm:text-sm tracking-wide">
           {isActive ? '广播中...' : followingUserId ? '跟随中' : 'Follow Me'}
         </span>
         
         {(isActive || followingUserId) && (
-          <span className="ml-1 flex h-2 w-2 relative">
+          <span className="ml-0.5 sm:ml-1 flex h-2 w-2 relative">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
           </span>
@@ -95,13 +95,13 @@ export const FollowMeToggle: React.FC<FollowMeToggleProps> = ({ editor }) => {
 
       {/* 跟随用户选择器（当有其他用户时显示） */}
       {!isActive && followableUsers.length > 0 && (
-        <div className="absolute bottom-full left-0 mb-2 glass-panel rounded-xl shadow-float p-2 min-w-[140px]">
+        <div className="absolute bottom-full left-0 mb-2 glass-panel rounded-xl shadow-float p-2 min-w-[120px] sm:min-w-[140px]">
           <div className="text-xs text-slate-500 px-2 py-1 mb-1">跟随用户</div>
           {followableUsers.map(user => (
             <button
               key={user.connectionId}
               onClick={() => followingUserId === String(user.connectionId) ? stopFollowing() : startFollowing(String(user.connectionId))}
-              className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors ${
+              className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs sm:text-sm transition-colors ${
                 followingUserId === String(user.connectionId)
                   ? 'bg-green-100 text-green-700'
                   : 'hover:bg-slate-100 text-slate-700'
@@ -111,7 +111,7 @@ export const FollowMeToggle: React.FC<FollowMeToggleProps> = ({ editor }) => {
                 className="w-2 h-2 rounded-full" 
                 style={{ backgroundColor: user.info?.color || user.presence?.color || '#6366f1' }}
               />
-              <span>{user.info?.name || user.presence?.name}</span>
+              <span className="truncate max-w-[80px] sm:max-w-none">{user.info?.name || user.presence?.name}</span>
             </button>
           ))}
         </div>

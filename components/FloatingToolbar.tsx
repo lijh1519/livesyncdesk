@@ -44,38 +44,38 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ activeTool, on
   };
 
   return (
-    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 z-50 pointer-events-none">
+    <div className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 sm:gap-4 z-50 pointer-events-none max-w-[calc(100vw-24px)]">
       
-      {/* Undo/Redo Group */}
-      <div className="pointer-events-auto flex items-center glass-panel shadow-float rounded-2xl p-1.5 gap-1">
+      {/* Undo/Redo Group - Hidden on very small screens */}
+      <div className="pointer-events-auto hidden sm:flex items-center glass-panel shadow-float rounded-xl sm:rounded-2xl p-1 sm:p-1.5 gap-0.5 sm:gap-1">
         <button 
           onClick={handleUndo}
           disabled={!canUndo}
-          className={`p-3 rounded-xl transition-colors ${
+          className={`p-2 sm:p-3 rounded-lg sm:rounded-xl transition-colors ${
             canUndo 
               ? 'text-slate-500 hover:text-slate-900 hover:bg-black/5' 
               : 'text-slate-300 cursor-not-allowed'
           }`}
           title="撤销 (Ctrl+Z)"
         >
-          <Undo2 size={20} />
+          <Undo2 size={18} className="sm:w-5 sm:h-5" />
         </button>
         <button 
           onClick={handleRedo}
           disabled={!canRedo}
-          className={`p-3 rounded-xl transition-colors ${
+          className={`p-2 sm:p-3 rounded-lg sm:rounded-xl transition-colors ${
             canRedo 
               ? 'text-slate-500 hover:text-slate-900 hover:bg-black/5' 
               : 'text-slate-300 cursor-not-allowed'
           }`}
           title="重做 (Ctrl+Shift+Z)"
         >
-          <Redo2 size={20} />
+          <Redo2 size={18} className="sm:w-5 sm:h-5" />
         </button>
       </div>
 
       {/* Main Tools Group */}
-      <div className="pointer-events-auto flex items-center glass-panel shadow-float rounded-2xl p-2 gap-1">
+      <div className="pointer-events-auto flex items-center glass-panel shadow-float rounded-xl sm:rounded-2xl p-1 sm:p-2 gap-0.5 sm:gap-1 overflow-x-auto">
         {tools.map((tool) => {
           const isActive = activeTool === tool.id;
           const Icon = tool.icon;
@@ -84,25 +84,25 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ activeTool, on
             <button
               key={tool.id}
               onClick={() => onToolSelect(tool.id)}
-              className={`group relative p-3 rounded-xl transition-all duration-200 ${
+              className={`group relative p-2 sm:p-3 rounded-lg sm:rounded-xl transition-all duration-200 flex-shrink-0 ${
                 isActive 
                   ? 'bg-primary/10 text-primary' 
                   : 'text-slate-500 hover:bg-black/5 hover:text-slate-900'
               }`}
               title={tool.label}
             >
-              <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
+              <Icon size={18} className="sm:w-[22px] sm:h-[22px]" strokeWidth={isActive ? 2.5 : 2} />
               {isActive && (
-                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
+                <span className="absolute -bottom-0.5 sm:-bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
               )}
             </button>
           );
         })}
         
-        <div className="w-px h-8 bg-slate-200 mx-2" />
+        <div className="w-px h-6 sm:h-8 bg-slate-200 mx-1 sm:mx-2 flex-shrink-0" />
         
-        <button className="flex items-center justify-center w-11 h-11 bg-primary hover:bg-primary-hover text-white rounded-xl shadow-lg shadow-blue-500/30 transition-all hover:scale-105 active:scale-95">
-          <Plus size={24} strokeWidth={3} />
+        <button className="flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 bg-primary hover:bg-primary-hover text-white rounded-lg sm:rounded-xl shadow-lg shadow-blue-500/30 transition-all hover:scale-105 active:scale-95 flex-shrink-0">
+          <Plus size={20} className="sm:w-6 sm:h-6" strokeWidth={3} />
         </button>
       </div>
     </div>
