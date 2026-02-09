@@ -194,16 +194,28 @@ export const CanvasWrapper: React.FC<CanvasWrapperProps> = ({ onEditorMount }) =
     setEditor(editorInstance);
     onEditorMount(editorInstance);
 
-    // Mac 键盘快捷键支持（Delete/Backspace/Cmd+Backspace 删除选中）
+    // Mac 键盘快捷键支持
     const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return;
+
+      // Cmd+Z 撤销
+      if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        editorInstance.undo();
+        return;
+      }
+
+      // Cmd+Shift+Z 重做
+      if ((e.metaKey || e.ctrlKey) && e.key === 'z' && e.shiftKey) {
+        e.preventDefault();
+        editorInstance.redo();
+        return;
+      }
+
+      // Delete/Backspace 删除选中
       const selected = editorInstance.getSelectedShapeIds();
-      if (selected.length === 0) return;
-      
-      if (e.key === 'Delete' || e.key === 'Backspace') {
-        // 避免在编辑文本时删除
-        const target = e.target as HTMLElement;
-        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return;
-        
+      if (selected.length > 0 && (e.key === 'Delete' || e.key === 'Backspace')) {
         e.preventDefault();
         editorInstance.deleteShapes(selected);
       }
