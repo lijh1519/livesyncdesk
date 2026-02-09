@@ -28,6 +28,13 @@ body {
   outline: none;
 }
 
+/* Hide Liveblocks watermark */
+[data-liveblocks-portal],
+iframe[title*="liveblocks"],
+div[class*="lb-"] {
+  display: none !important;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;
