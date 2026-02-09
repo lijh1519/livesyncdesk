@@ -193,6 +193,24 @@ export const CanvasWrapper: React.FC<CanvasWrapperProps> = ({ onEditorMount }) =
 
     setEditor(editorInstance);
     onEditorMount(editorInstance);
+
+    // Mac 键盘快捷键支持（Delete/Backspace/Cmd+Backspace 删除选中）
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const selected = editorInstance.getSelectedShapeIds();
+      if (selected.length === 0) return;
+      
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        // 避免在编辑文本时删除
+        const target = e.target as HTMLElement;
+        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return;
+        
+        e.preventDefault();
+        editorInstance.deleteShapes(selected);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onEditorMount]);
 
   // 光标追踪
