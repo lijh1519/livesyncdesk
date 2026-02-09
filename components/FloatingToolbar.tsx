@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Editor } from 'tldraw';
 import { 
   MousePointer2, 
@@ -21,6 +21,29 @@ interface FloatingToolbarProps {
 }
 
 export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ activeTool, onToolSelect, editor, onAIClick }) => {
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
+  const [hasSelection, setHasSelection] = useState(false);
+
+  useEffect(() => {
+    if (!editor) return;
+
+    const update = () => {
+      setCanUndo(editor.getCanUndo());
+      setCanRedo(editor.getCanRedo());
+      setHasSelection(editor.getSelectedShapes().length > 0);
+    };
+
+    update();
+    const unsub = editor.store.listen(update, { scope: 'all' });
+    // Also listen for selection changes
+    const interval = setInterval(update, 300);
+    return () => {
+      unsub();
+      clearInterval(interval);
+    };
+  }, [editor]);
+
   const tools = [
     { id: 'select', icon: MousePointer2, label: 'Select' },
     { id: 'hand', icon: Hand, label: 'Pan' },
@@ -30,20 +53,12 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ activeTool, on
     { id: 'image', icon: ImageIcon, label: 'Image' },
   ];
 
-  const canUndo = editor?.getCanUndo() ?? false;
-  const canRedo = editor?.getCanRedo() ?? false;
-  const hasSelection = (editor?.getSelectedShapes()?.length ?? 0) > 0;
-
   const handleUndo = () => {
-    if (editor && canUndo) {
-      editor.undo();
-    }
+    if (editor) editor.undo();
   };
 
   const handleRedo = () => {
-    if (editor && canRedo) {
-      editor.redo();
-    }
+    if (editor) editor.redo();
   };
 
   const handleDelete = () => {
