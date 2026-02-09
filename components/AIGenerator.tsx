@@ -39,91 +39,136 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({ isOpen, onClose, onGen
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-[90%] max-w-md p-6 animate-in fade-in zoom-in duration-200">
+    <div 
+      className="fixed inset-0 z-[100] flex items-center justify-center"
+      style={{ backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(4px)' }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div 
+        className="bg-white rounded-2xl shadow-2xl"
+        style={{ width: '90%', maxWidth: '400px', padding: '24px' }}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className="p-2 bg-primary/10 rounded-xl">
-              <Sparkles size={20} className="text-primary" />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ padding: '8px', backgroundColor: 'rgba(99,102,241,0.1)', borderRadius: '12px' }}>
+              <Sparkles size={20} color="#6366f1" />
             </div>
-            <h2 className="text-lg font-bold text-slate-900">AI 生成便签</h2>
+            <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a' }}>AI 生成便签</h2>
           </div>
           <button 
             onClick={onClose}
-            className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+            style={{ padding: '8px', borderRadius: '8px', border: 'none', background: 'transparent', cursor: 'pointer' }}
           >
-            <X size={20} className="text-slate-500" />
+            <X size={20} color="#64748b" />
           </button>
         </div>
 
-        {/* Content */}
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
-              主题 / 关键词
-            </label>
-            <input
-              type="text"
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              placeholder="例如：产品上线前的准备工作"
-              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-              disabled={loading}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
-              生成数量
-            </label>
-            <div className="flex gap-2">
-              {[3, 5, 8].map((n) => (
-                <button
-                  key={n}
-                  onClick={() => setCount(n)}
-                  className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
-                    count === n
-                      ? 'bg-primary text-white'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                  disabled={loading}
-                >
-                  {n} 个
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {error && (
-            <div className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg">
-              {error}
-            </div>
-          )}
+        {/* 主题输入 */}
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#334155', marginBottom: '6px' }}>
+            主题 / 关键词
+          </label>
+          <input
+            type="text"
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            placeholder="例如：产品上线前的准备工作"
+            disabled={loading}
+            style={{
+              width: '100%',
+              padding: '10px 16px',
+              border: '1px solid #e2e8f0',
+              borderRadius: '12px',
+              fontSize: '14px',
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
+          />
         </div>
 
-        {/* Footer */}
-        <div className="mt-6 flex gap-3">
+        {/* 数量选择 */}
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#334155', marginBottom: '6px' }}>
+            生成数量
+          </label>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {[3, 5, 8].map((n) => (
+              <button
+                key={n}
+                onClick={() => setCount(n)}
+                disabled={loading}
+                style={{
+                  flex: 1,
+                  padding: '8px 0',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  border: 'none',
+                  cursor: 'pointer',
+                  backgroundColor: count === n ? '#6366f1' : '#f1f5f9',
+                  color: count === n ? '#fff' : '#475569',
+                }}
+              >
+                {n} 个
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 错误提示 */}
+        {error && (
+          <div style={{ fontSize: '14px', color: '#ef4444', backgroundColor: '#fef2f2', padding: '8px 12px', borderRadius: '8px', marginBottom: '16px' }}>
+            {error}
+          </div>
+        )}
+
+        {/* 按钮 */}
+        <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
           <button
             onClick={onClose}
-            className="flex-1 py-2.5 text-slate-600 hover:bg-slate-100 rounded-xl transition-colors font-medium"
             disabled={loading}
+            style={{
+              flex: 1,
+              padding: '10px 0',
+              borderRadius: '12px',
+              border: '1px solid #e2e8f0',
+              background: '#fff',
+              color: '#475569',
+              fontWeight: 500,
+              fontSize: '14px',
+              cursor: 'pointer',
+            }}
           >
             取消
           </button>
           <button
             onClick={handleGenerate}
             disabled={loading || !topic.trim()}
-            className="flex-1 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-xl transition-all font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              flex: 1,
+              padding: '10px 0',
+              borderRadius: '12px',
+              border: 'none',
+              background: loading || !topic.trim() ? '#a5b4fc' : '#6366f1',
+              color: '#fff',
+              fontWeight: 500,
+              fontSize: '14px',
+              cursor: loading || !topic.trim() ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+            }}
           >
             {loading ? (
               <>
-                <Loader2 size={18} className="animate-spin" />
+                <Loader2 size={16} className="animate-spin" />
                 生成中...
               </>
             ) : (
               <>
-                <Sparkles size={18} />
+                <Sparkles size={16} />
                 生成
               </>
             )}

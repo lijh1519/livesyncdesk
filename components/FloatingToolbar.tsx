@@ -9,7 +9,8 @@ import {
   Image as ImageIcon, 
   Sparkles,
   Undo2,
-  Redo2
+  Redo2,
+  Trash2
 } from 'lucide-react';
 
 interface FloatingToolbarProps {
@@ -31,6 +32,7 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ activeTool, on
 
   const canUndo = editor?.getCanUndo() ?? false;
   const canRedo = editor?.getCanRedo() ?? false;
+  const hasSelection = (editor?.getSelectedShapes()?.length ?? 0) > 0;
 
   const handleUndo = () => {
     if (editor && canUndo) {
@@ -44,10 +46,16 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ activeTool, on
     }
   };
 
+  const handleDelete = () => {
+    if (editor && hasSelection) {
+      editor.deleteShapes(editor.getSelectedShapeIds());
+    }
+  };
+
   return (
     <div className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 sm:gap-4 z-50 pointer-events-none max-w-[calc(100vw-24px)]">
       
-      {/* Undo/Redo Group - Hidden on very small screens */}
+      {/* Undo/Redo/Delete Group */}
       <div className="pointer-events-auto hidden sm:flex items-center glass-panel shadow-float rounded-xl sm:rounded-2xl p-1 sm:p-1.5 gap-0.5 sm:gap-1">
         <button 
           onClick={handleUndo}
@@ -72,6 +80,18 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ activeTool, on
           title="重做 (Ctrl+Shift+Z)"
         >
           <Redo2 size={18} className="sm:w-5 sm:h-5" />
+        </button>
+        <button 
+          onClick={handleDelete}
+          disabled={!hasSelection}
+          className={`p-2 sm:p-3 rounded-lg sm:rounded-xl transition-colors ${
+            hasSelection 
+              ? 'text-red-400 hover:text-red-600 hover:bg-red-50' 
+              : 'text-slate-300 cursor-not-allowed'
+          }`}
+          title="删除选中 (Delete)"
+        >
+          <Trash2 size={18} className="sm:w-5 sm:h-5" />
         </button>
       </div>
 

@@ -1,6 +1,6 @@
 // OpenRouter AI 服务模块
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const MODEL = 'google/gemini-2.5-flash-preview-05-20';
+const MODEL = 'google/gemini-2.5-flash';
 
 interface Message {
   role: 'user' | 'assistant' | 'system';
@@ -30,15 +30,9 @@ export async function chat(messages: Message[], useJsonFormat = false): Promise<
     const body: any = {
       model: MODEL,
       messages,
-      temperature: 0.15,
-      top_p: 0.9,
-      presence_penalty: 0,
+      temperature: 0.7,
       max_tokens: 2048,
     };
-
-    if (useJsonFormat) {
-      body.response_format = { type: 'json_object' };
-    }
 
     const response = await fetch(OPENROUTER_API_URL, {
       method: 'POST',
