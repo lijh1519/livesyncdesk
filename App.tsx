@@ -96,10 +96,18 @@ function EditorContent({ roomId }: { roomId: string }) {
         }
       });
       document.querySelectorAll('[data-liveblocks-portal]').forEach(el => el.remove());
+      // 按文本内容查找
+      document.querySelectorAll('a[href*="liveblocks"], div').forEach(el => {
+        if (el.textContent?.includes('Powered by') && el.textContent?.includes('liveblocks')) {
+          (el as HTMLElement).style.display = 'none';
+          el.parentElement && (el.parentElement.style.display = 'none');
+        }
+      });
     };
     remove();
-    const timer = setInterval(remove, 2000);
-    return () => clearInterval(timer);
+    const observer = new MutationObserver(remove);
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
   }, []);
 
   // 监听用户加入/离开
@@ -271,10 +279,10 @@ function EditorContent({ roomId }: { roomId: string }) {
           
           <button 
             onClick={handleShare}
-            className="flex items-center gap-1.5 sm:gap-2 bg-primary hover:bg-primary-hover text-white px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 font-semibold text-xs sm:text-sm"
+            style={{ background: '#6366f1', color: '#fff', padding: '8px 16px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 4px 12px rgba(99,102,241,0.3)' }}
           >
             {copied ? <Check size={14} strokeWidth={2.5} /> : <Share size={14} strokeWidth={2.5} />}
-            <span className="hidden sm:inline">{copied ? 'Copied!' : 'Share'}</span>
+            <span>{copied ? 'Copied!' : 'Share'}</span>
           </button>
         </div>
       </header>
