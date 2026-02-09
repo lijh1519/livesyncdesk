@@ -31,8 +31,17 @@ body {
 /* Hide Liveblocks watermark */
 [data-liveblocks-portal],
 iframe[title*="liveblocks"],
-div[class*="lb-"] {
+iframe[title*="Liveblocks"],
+div[class*="lb-"],
+div[style*="liveblocks"] {
   display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  overflow: hidden !important;
 }
 
 /* Scrollbar styling */

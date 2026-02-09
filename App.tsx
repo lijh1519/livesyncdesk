@@ -87,6 +87,21 @@ function EditorContent({ roomId }: { roomId: string }) {
   const others = useOthers();
   const prevOthersRef = useRef<number[]>([]);
 
+  // 移除 Liveblocks 水印
+  useEffect(() => {
+    const remove = () => {
+      document.querySelectorAll('iframe').forEach((el) => {
+        if (el.src?.includes('liveblocks') || el.title?.toLowerCase().includes('liveblocks')) {
+          el.remove();
+        }
+      });
+      document.querySelectorAll('[data-liveblocks-portal]').forEach(el => el.remove());
+    };
+    remove();
+    const timer = setInterval(remove, 2000);
+    return () => clearInterval(timer);
+  }, []);
+
   // 监听用户加入/离开
   useEffect(() => {
     const currentIds = others.map(o => o.connectionId);
