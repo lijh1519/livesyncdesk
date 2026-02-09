@@ -7,7 +7,7 @@ import {
   Square, 
   StickyNote, 
   Image as ImageIcon, 
-  Plus,
+  Sparkles,
   Undo2,
   Redo2
 } from 'lucide-react';
@@ -16,9 +16,10 @@ interface FloatingToolbarProps {
   activeTool: string;
   onToolSelect: (tool: string) => void;
   editor: Editor | null;
+  onAIClick?: () => void;
 }
 
-export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ activeTool, onToolSelect, editor }) => {
+export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ activeTool, onToolSelect, editor, onAIClick }) => {
   const tools = [
     { id: 'select', icon: MousePointer2, label: 'Select' },
     { id: 'hand', icon: Hand, label: 'Pan' },
@@ -101,8 +102,12 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ activeTool, on
         
         <div className="w-px h-6 sm:h-8 bg-slate-200 mx-1 sm:mx-2 flex-shrink-0" />
         
-        <button className="flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 bg-primary hover:bg-primary-hover text-white rounded-lg sm:rounded-xl shadow-lg shadow-blue-500/30 transition-all hover:scale-105 active:scale-95 flex-shrink-0">
-          <Plus size={20} className="sm:w-6 sm:h-6" strokeWidth={3} />
+        <button 
+          onClick={onAIClick}
+          className="flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 bg-gradient-to-r from-purple-500 to-primary hover:from-purple-600 hover:to-primary-hover text-white rounded-lg sm:rounded-xl shadow-lg shadow-purple-500/30 transition-all hover:scale-105 active:scale-95 flex-shrink-0"
+          title="AI 生成便签"
+        >
+          <Sparkles size={18} className="sm:w-5 sm:h-5" />
         </button>
       </div>
     </div>

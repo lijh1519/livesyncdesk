@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { ArrowLeft, Share, Check, Copy } from 'lucide-react';
-import { Editor } from 'tldraw';
+import { Editor, createShapeId } from 'tldraw';
 import { RoomProvider, useOthers, useStatus } from './liveblocks.config';
 import { AvatarGroup } from './components/AvatarGroup';
 import { FloatingToolbar } from './components/FloatingToolbar';
 import { FollowMeToggle } from './components/FollowMeToggle';
 import { CanvasWrapper } from './components/CanvasWrapper';
 import { ToastProvider, useToast } from './components/Toast';
+import { AIGenerator } from './components/AIGenerator';
 import { User } from './types';
 import { nanoid } from 'nanoid';
 
@@ -81,6 +82,7 @@ function EditorContent({ roomId }: { roomId: string }) {
   const [activeTool, setActiveTool] = useState('select');
   const [editor, setEditor] = useState<Editor | null>(null);
   const [copied, setCopied] = useState(false);
+  const [showAIGenerator, setShowAIGenerator] = useState(false);
   const { showToast } = useToast();
   const others = useOthers();
   const prevOthersRef = useRef<number[]>([]);
@@ -199,6 +201,36 @@ function EditorContent({ roomId }: { roomId: string }) {
     }
   };
 
+  // AI 生成便签处理
+  const handleAIGenerate = useCallback((notes: string[]) => {
+    if (!editor) return;
+
+    const COLORS = ['yellow', 'blue', 'green', 'violet', 'red'] as const;
+    const center = editor.getViewportScreenCenter();
+    const startX = center.x - 200;
+    const startY = center.y - 100;
+
+    notes.forEach((text, index) => {
+      const row = Math.floor(index / 3);
+      const col = index % 3;
+      
+      editor.createShape({
+        id: createShapeId(),
+        type: 'note',
+        x: startX + col * 220,
+        y: startY + row * 180,
+        rotation: (Math.random() - 0.5) * 0.1,
+        props: {
+          color: COLORS[index % COLORS.length],
+          text,
+        },
+      });
+    });
+
+    showToast(`已生成 ${notes.length} 个便签`, 'success');
+    editor.setCurrentTool('select');
+  }, [editor, showToast]);
+
   return (
     <div className="relative w-full h-screen bg-bg-light bg-dot-pattern overflow-hidden text-slate-900 selection:bg-blue-100 font-sans">
       
@@ -239,7 +271,19 @@ function EditorContent({ roomId }: { roomId: string }) {
 
       {/* Floating UI Elements */}
       <FollowMeToggle editor={editor} />
-      <FloatingToolbar activeTool={activeTool} onToolSelect={handleToolSelect} editor={editor} />
+      <FloatingToolbar 
+        activeTool={activeTool} 
+        onToolSelect={handleToolSelect} 
+        editor={editor} 
+        onAIClick={() => setShowAIGenerator(true)}
+      />
+
+      {/* AI Generator Modal */}
+      <AIGenerator
+        isOpen={showAIGenerator}
+        onClose={() => setShowAIGenerator(false)}
+        onGenerate={handleAIGenerate}
+      />
       
     </div>
   );
