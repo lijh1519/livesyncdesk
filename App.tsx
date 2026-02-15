@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { ArrowLeft, Share, Check, Copy } from 'lucide-react';
+import { ArrowLeft, Share, Check, Copy, LogOut } from 'lucide-react';
 import { Editor, createShapeId } from 'tldraw';
 import { RoomProvider, useOthers, useStatus } from './liveblocks.config';
 import { AvatarGroup } from './components/AvatarGroup';
@@ -8,6 +8,8 @@ import { FollowMeToggle } from './components/FollowMeToggle';
 import { CanvasWrapper } from './components/CanvasWrapper';
 import { ToastProvider, useToast } from './components/Toast';
 import { AIGenerator } from './components/AIGenerator';
+import { LoginPage } from './components/LoginPage';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { User } from './types';
 import { nanoid } from 'nanoid';
 
@@ -84,6 +86,7 @@ function EditorContent({ roomId }: { roomId: string }) {
   const [copied, setCopied] = useState(false);
   const [showAIGenerator, setShowAIGenerator] = useState(false);
   const { showToast } = useToast();
+  const { user, signOut } = useAuth();
   const others = useOthers();
   const prevOthersRef = useRef<number[]>([]);
 
@@ -284,6 +287,22 @@ function EditorContent({ roomId }: { roomId: string }) {
             {copied ? <Check size={14} strokeWidth={2.5} /> : <Share size={14} strokeWidth={2.5} />}
             <span>{copied ? 'Copied!' : 'Share'}</span>
           </button>
+
+          {/* User Avatar & Logout */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <img 
+              src={user?.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/thumbs/svg?seed=${user?.id}`}
+              alt="avatar"
+              style={{ width: 36, height: 36, borderRadius: '50%', border: '2px solid #fff', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+            />
+            <button
+              onClick={signOut}
+              title="Logout"
+              style={{ background: '#f1f5f9', border: 'none', padding: '8px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+            >
+              <LogOut size={16} color="#64748b" />
+            </button>
+          </div>
         </div>
       </header>
 
@@ -312,16 +331,47 @@ function EditorContent({ roomId }: { roomId: string }) {
   );
 }
 
-// 主应用入口（包裹 RoomProvider）
-export default function App() {
+// 认证保护的应用内容
+function AuthenticatedApp() {
+  const { user, loading, signOut } = useAuth();
+  
   // 获取房间 ID（从 URL 或生成新 ID）
   const roomId = useMemo(() => getRoomId(), []);
   
-  // 生成稳定的用户信息
+  // 生成稳定的用户信息（优先使用登录用户信息）
   const userInfo = useMemo(() => ({
-    name: randomName(),
+    name: user?.user_metadata?.name || user?.email?.split('@')[0] || randomName(),
     color: randomColor(),
-  }), []);
+    avatar: user?.user_metadata?.avatar_url,
+  }), [user]);
+
+  if (loading) {
+    return (
+      <div style={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        background: '#f0f2f5'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div className="animate-spin" style={{ 
+            width: 40, 
+            height: 40, 
+            border: '3px solid #e2e8f0', 
+            borderTopColor: '#6366f1',
+            borderRadius: '50%',
+            margin: '0 auto 16px'
+          }} />
+          <p style={{ color: '#64748b' }}>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <LoginPage />;
+  }
 
   return (
     <ToastProvider>
@@ -337,5 +387,14 @@ export default function App() {
         <EditorContent roomId={roomId} />
       </RoomProvider>
     </ToastProvider>
+  );
+}
+
+// 主应用入口
+export default function App() {
+  return (
+    <AuthProvider>
+      <AuthenticatedApp />
+    </AuthProvider>
   );
 }
