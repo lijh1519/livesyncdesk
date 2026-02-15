@@ -8,7 +8,7 @@ interface PricingPageProps {
 
 export function PricingPage({ onBack, onSelectPlan }: PricingPageProps) {
   return (
-    <div style={{ minHeight: '100vh', background: '#fafafa' }}>
+    <div style={{ minHeight: '100vh', height: '100vh', overflow: 'auto', background: '#0a0a0f', color: '#fff', fontFamily: 'Inter, system-ui, sans-serif' }}>
       {/* Navigation */}
       <nav style={{
         position: 'fixed',
@@ -16,9 +16,9 @@ export function PricingPage({ onBack, onSelectPlan }: PricingPageProps) {
         left: 0,
         right: 0,
         zIndex: 100,
-        background: 'rgba(255,255,255,0.8)',
+        background: 'rgba(10,10,15,0.8)',
         backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(0,0,0,0.05)'
+        borderBottom: '1px solid rgba(255,255,255,0.05)'
       }}>
         <div style={{
           maxWidth: 1200,
@@ -36,7 +36,7 @@ export function PricingPage({ onBack, onSelectPlan }: PricingPageProps) {
               gap: 6,
               background: 'transparent',
               border: 'none',
-              color: '#64748b',
+              color: '#94a3b8',
               fontSize: 14,
               cursor: 'pointer'
             }}
@@ -45,19 +45,18 @@ export function PricingPage({ onBack, onSelectPlan }: PricingPageProps) {
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{
-              width: 36,
-              height: 36,
+              width: 32,
+              height: 32,
               background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-              borderRadius: 10,
+              borderRadius: 8,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#fff',
-              fontSize: 18
+              fontSize: 14
             }}>
               ✏️
             </div>
-            <span style={{ fontSize: 18, fontWeight: 700, color: '#1e293b' }}>LiveSyncDesk</span>
+            <span style={{ fontSize: 16, fontWeight: 700 }}>LiveSyncDesk</span>
           </div>
         </div>
       </nav>
@@ -66,10 +65,10 @@ export function PricingPage({ onBack, onSelectPlan }: PricingPageProps) {
       <section style={{ paddingTop: 120, paddingBottom: 80 }}>
         <div style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px' }}>
           <div style={{ textAlign: 'center', marginBottom: 60 }}>
-            <h1 style={{ fontSize: 40, fontWeight: 800, color: '#0f172a', marginBottom: 12 }}>
+            <h1 style={{ fontSize: 40, fontWeight: 700, marginBottom: 12 }}>
               Simple, transparent pricing
             </h1>
-            <p style={{ fontSize: 18, color: '#64748b' }}>
+            <p style={{ fontSize: 18, color: '#94a3b8' }}>
               Start free, upgrade when you need more
             </p>
           </div>
@@ -83,32 +82,32 @@ export function PricingPage({ onBack, onSelectPlan }: PricingPageProps) {
           }}>
             {/* Free Plan */}
             <div style={{
-              background: '#fff',
+              background: '#16161f',
               borderRadius: 20,
               padding: 32,
-              border: '1px solid #e2e8f0'
+              border: '1px solid rgba(255,255,255,0.08)'
             }}>
               <div style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 8,
-                background: '#f1f5f9',
+                background: 'rgba(255,255,255,0.08)',
                 padding: '6px 12px',
                 borderRadius: 20,
                 fontSize: 13,
                 fontWeight: 600,
-                color: '#64748b',
+                color: '#94a3b8',
                 marginBottom: 20
               }}>
                 <Sparkles size={14} /> Free
               </div>
               
               <div style={{ marginBottom: 24 }}>
-                <span style={{ fontSize: 48, fontWeight: 800, color: '#0f172a' }}>$0</span>
+                <span style={{ fontSize: 48, fontWeight: 800 }}>$0</span>
                 <span style={{ color: '#64748b' }}>/month</span>
               </div>
 
-              <p style={{ color: '#64748b', fontSize: 14, marginBottom: 24 }}>
+              <p style={{ color: '#94a3b8', fontSize: 14, marginBottom: 24 }}>
                 Perfect for trying out LiveSyncDesk
               </p>
 
@@ -117,9 +116,9 @@ export function PricingPage({ onBack, onSelectPlan }: PricingPageProps) {
                 style={{
                   width: '100%',
                   padding: '14px',
-                  background: '#f1f5f9',
-                  color: '#1e293b',
-                  border: 'none',
+                  background: 'rgba(255,255,255,0.08)',
+                  color: '#fff',
+                  border: '1px solid rgba(255,255,255,0.1)',
                   borderRadius: 12,
                   fontSize: 15,
                   fontWeight: 600,
@@ -219,7 +218,7 @@ export function PricingPage({ onBack, onSelectPlan }: PricingPageProps) {
               All plans include real-time collaboration, secure cloud storage, and access on any device.
             </p>
             <p style={{ marginTop: 8 }}>
-              Questions? Contact us at <a href="mailto:support@livesyncdesk.com" style={{ color: '#6366f1' }}>support@livesyncdesk.com</a>
+              Questions? Contact us at <a href="mailto:support@livesyncdesk.com" style={{ color: '#a5b4fc' }}>support@livesyncdesk.com</a>
             </p>
           </div>
         </div>
@@ -235,7 +234,7 @@ function PricingFeature({ text, white }: { text: string; white?: boolean }) {
       alignItems: 'center',
       gap: 10,
       padding: '8px 0',
-      color: white ? '#fff' : '#475569',
+      color: white ? '#fff' : '#cbd5e1',
       fontSize: 14
     }}>
       <Check size={18} color={white ? '#fff' : '#22c55e'} />

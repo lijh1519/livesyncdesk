@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Sparkles, Users, Zap, ArrowRight, Check, Star } from 'lucide-react';
+import { ArrowRight, RefreshCw, Sparkles, Layers, Twitter, Github, Mail } from 'lucide-react';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -10,9 +10,23 @@ interface LandingPageProps {
 
 export function LandingPage({ onGetStarted, onLogin, onPricing }: LandingPageProps) {
   const { user } = useAuth();
+  const featuresRef = useRef<HTMLElement>(null);
+  const ctaRef = useRef<HTMLElement>(null);
+
+  const scrollToFeatures = () => {
+    featuresRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleContact = () => {
+    window.location.href = 'mailto:support@livesyncdesk.com?subject=LiveSyncDesk Inquiry';
+  };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#fafafa' }}>
+    <div style={{ minHeight: '100vh', height: '100vh', overflow: 'auto', background: '#0a0a0f', color: '#fff', fontFamily: 'Inter, system-ui, sans-serif' }}>
       {/* Navigation */}
       <nav style={{
         position: 'fixed',
@@ -20,9 +34,9 @@ export function LandingPage({ onGetStarted, onLogin, onPricing }: LandingPagePro
         left: 0,
         right: 0,
         zIndex: 100,
-        background: 'rgba(255,255,255,0.8)',
+        background: 'rgba(10,10,15,0.8)',
         backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(0,0,0,0.05)'
+        borderBottom: '1px solid rgba(255,255,255,0.05)'
       }}>
         <div style={{
           maxWidth: 1200,
@@ -32,139 +46,176 @@ export function LandingPage({ onGetStarted, onLogin, onPricing }: LandingPagePro
           alignItems: 'center',
           justifyContent: 'space-between'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div 
+            onClick={scrollToTop}
+            style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
+          >
             <div style={{
-              width: 36,
-              height: 36,
+              width: 32,
+              height: 32,
               background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-              borderRadius: 10,
+              borderRadius: 8,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#fff',
-              fontSize: 18
+              fontSize: 14
             }}>
               ✏️
             </div>
-            <span style={{ fontSize: 18, fontWeight: 700, color: '#1e293b' }}>LiveSyncDesk</span>
+            <span style={{ fontSize: 16, fontWeight: 700 }}>LiveSyncDesk</span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <button
-              onClick={onPricing}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#64748b',
-                fontSize: 14,
-                fontWeight: 500,
-                cursor: 'pointer',
-                padding: '8px 16px'
-              }}
-            >
-              Pricing
-            </button>
-            {user ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
+            <div style={{ display: 'flex', gap: 24 }}>
               <button
-                onClick={onGetStarted}
+                onClick={scrollToTop}
                 style={{
-                  background: '#6366f1',
-                  color: '#fff',
+                  background: 'transparent',
                   border: 'none',
-                  padding: '10px 20px',
-                  borderRadius: 10,
+                  color: '#94a3b8',
                   fontSize: 14,
-                  fontWeight: 600,
                   cursor: 'pointer'
                 }}
               >
-                Go to App
+                Product
               </button>
-            ) : (
-              <>
+              <button
+                onClick={scrollToFeatures}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#94a3b8',
+                  fontSize: 14,
+                  cursor: 'pointer'
+                }}
+              >
+                Features
+              </button>
+              <button
+                onClick={onPricing}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#94a3b8',
+                  fontSize: 14,
+                  cursor: 'pointer'
+                }}
+              >
+                Pricing
+              </button>
+              <button
+                onClick={handleContact}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#94a3b8',
+                  fontSize: 14,
+                  cursor: 'pointer'
+                }}
+              >
+                Contact
+              </button>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              {user ? (
                 <button
-                  onClick={onLogin}
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#1e293b',
-                    fontSize: 14,
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                    padding: '8px 16px'
-                  }}
-                >
-                  Log in
-                </button>
-                <button
-                  onClick={onLogin}
+                  onClick={onGetStarted}
                   style={{
                     background: '#6366f1',
                     color: '#fff',
                     border: 'none',
                     padding: '10px 20px',
-                    borderRadius: 10,
+                    borderRadius: 8,
                     fontSize: 14,
-                    fontWeight: 600,
+                    fontWeight: 500,
                     cursor: 'pointer'
                   }}
                 >
-                  Sign up
+                  Go to App
                 </button>
-              </>
-            )}
+              ) : (
+                <>
+                  <button
+                    onClick={onLogin}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: '#fff',
+                      fontSize: 14,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Log in
+                  </button>
+                  <button
+                    onClick={onLogin}
+                    style={{
+                      background: '#6366f1',
+                      color: '#fff',
+                      border: 'none',
+                      padding: '10px 20px',
+                      borderRadius: 8,
+                      fontSize: 14,
+                      fontWeight: 500,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Sign up
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
       <section style={{
-        paddingTop: 140,
-        paddingBottom: 80,
-        textAlign: 'center',
-        background: 'linear-gradient(180deg, #fff 0%, #f8fafc 100%)'
+        paddingTop: 120,
+        paddingBottom: 60,
+        textAlign: 'center'
       }}>
         <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 24px' }}>
           <div style={{
             display: 'inline-flex',
             alignItems: 'center',
             gap: 8,
-            background: '#fef3c7',
-            color: '#92400e',
-            padding: '6px 14px',
-            borderRadius: 20,
+            background: 'rgba(99,102,241,0.15)',
+            border: '1px solid rgba(99,102,241,0.3)',
+            color: '#a5b4fc',
+            padding: '8px 16px',
+            borderRadius: 24,
             fontSize: 13,
             fontWeight: 500,
-            marginBottom: 24
+            marginBottom: 32
           }}>
-            <Star size={14} fill="#f59e0b" color="#f59e0b" />
-            AI-Powered Collaborative Whiteboard
+            <span style={{ width: 6, height: 6, background: '#22c55e', borderRadius: '50%' }} />
+            AI-POWERED COLLABORATIVE WHITEBOARD
           </div>
 
           <h1 style={{
-            fontSize: 'clamp(36px, 6vw, 56px)',
-            fontWeight: 800,
-            color: '#0f172a',
+            fontSize: 'clamp(40px, 7vw, 64px)',
+            fontWeight: 700,
             lineHeight: 1.1,
-            marginBottom: 20
+            marginBottom: 24
           }}>
-            <span style={{ color: '#6366f1' }}>Brainstorm Together</span>
-            <br />in Real-Time
+            Brainstorm Together
+            <br />
+            <span style={{ color: '#8b5cf6' }}>in Real-Time</span>
           </h1>
 
           <p style={{
             fontSize: 18,
-            color: '#64748b',
-            lineHeight: 1.6,
-            marginBottom: 36,
-            maxWidth: 600,
-            margin: '0 auto 36px'
+            color: '#94a3b8',
+            lineHeight: 1.7,
+            marginBottom: 40,
+            maxWidth: 560,
+            margin: '0 auto 40px'
           }}>
-            Create, collaborate, and organize your ideas with AI-powered sticky notes.
-            Real-time sync keeps your team aligned, anywhere in the world.
+            Create, collaborate, and organize your ideas with AI-powered sticky notes. Real-time sync keeps your team aligned, anywhere in the world.
           </p>
 
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
             <button
               onClick={onGetStarted}
               style={{
@@ -175,11 +226,10 @@ export function LandingPage({ onGetStarted, onLogin, onPricing }: LandingPagePro
                 color: '#fff',
                 border: 'none',
                 padding: '14px 28px',
-                borderRadius: 12,
-                fontSize: 16,
+                borderRadius: 10,
+                fontSize: 15,
                 fontWeight: 600,
-                cursor: 'pointer',
-                boxShadow: '0 4px 14px rgba(99,102,241,0.4)'
+                cursor: 'pointer'
               }}
             >
               Start for Free <ArrowRight size={18} />
@@ -190,12 +240,12 @@ export function LandingPage({ onGetStarted, onLogin, onPricing }: LandingPagePro
                 display: 'flex',
                 alignItems: 'center',
                 gap: 8,
-                background: '#fff',
-                color: '#1e293b',
-                border: '1px solid #e2e8f0',
+                background: 'transparent',
+                color: '#fff',
+                border: '1px solid rgba(255,255,255,0.2)',
                 padding: '14px 28px',
-                borderRadius: 12,
-                fontSize: 16,
+                borderRadius: 10,
+                fontSize: 15,
                 fontWeight: 600,
                 cursor: 'pointer'
               }}
@@ -205,76 +255,86 @@ export function LandingPage({ onGetStarted, onLogin, onPricing }: LandingPagePro
           </div>
         </div>
 
-        {/* Hero Image/Preview */}
+        {/* Hero Image */}
         <div style={{
-          maxWidth: 1000,
+          maxWidth: 900,
           margin: '60px auto 0',
           padding: '0 24px'
         }}>
           <div style={{
-            background: '#fff',
+            position: 'relative',
             borderRadius: 16,
-            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.15)',
             overflow: 'hidden',
-            border: '1px solid #e2e8f0'
+            background: 'linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%)',
+            border: '1px solid rgba(255,255,255,0.1)'
           }}>
             <div style={{
-              background: '#f8fafc',
-              padding: '12px 16px',
-              borderBottom: '1px solid #e2e8f0',
-              display: 'flex',
-              gap: 8
-            }}>
-              <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#ef4444' }} />
-              <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#f59e0b' }} />
-              <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#22c55e' }} />
-            </div>
-            <div style={{
-              height: 400,
-              background: 'linear-gradient(135deg, #f0f4ff 0%, #fdf4ff 100%)',
+              height: 420,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 24,
               padding: 40,
-              flexWrap: 'wrap'
+              position: 'relative'
             }}>
-              {/* Sample sticky notes */}
+              {/* Simulated whiteboard UI */}
               <div style={{
-                width: 180,
-                padding: 20,
-                background: '#fef08a',
-                borderRadius: 4,
-                boxShadow: '2px 2px 8px rgba(0,0,0,0.1)',
-                transform: 'rotate(-2deg)',
-                fontFamily: 'cursive',
-                fontSize: 14
+                width: '100%',
+                height: '100%',
+                background: 'linear-gradient(180deg, #1a1a2e 0%, #16162a 100%)',
+                borderRadius: 12,
+                position: 'relative',
+                overflow: 'hidden'
               }}>
-                Launch MVP by Q2 🚀
-              </div>
-              <div style={{
-                width: 180,
-                padding: 20,
-                background: '#bfdbfe',
-                borderRadius: 4,
-                boxShadow: '2px 2px 8px rgba(0,0,0,0.1)',
-                transform: 'rotate(3deg)',
-                fontFamily: 'cursive',
-                fontSize: 14
-              }}>
-                User research insights
-              </div>
-              <div style={{
-                width: 180,
-                padding: 20,
-                background: '#bbf7d0',
-                borderRadius: 4,
-                boxShadow: '2px 2px 8px rgba(0,0,0,0.1)',
-                transform: 'rotate(-1deg)',
-                fontFamily: 'cursive',
-                fontSize: 14
-              }}>
-                Design system v2 ✨
+                {/* Sticky note 1 */}
+                <div style={{
+                  position: 'absolute',
+                  top: 60,
+                  left: 80,
+                  width: 160,
+                  padding: 16,
+                  background: '#fef08a',
+                  borderRadius: 4,
+                  color: '#1e293b',
+                  fontSize: 12,
+                  fontWeight: 500,
+                  transform: 'rotate(-2deg)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                }}>
+                  <div style={{ fontSize: 10, color: '#6366f1', fontWeight: 700, marginBottom: 6 }}>USER RESEARCH</div>
+                  Focus on accessibility first.
+                </div>
+
+                {/* Sticky note 2 - AI generated */}
+                <div style={{
+                  position: 'absolute',
+                  top: 180,
+                  right: 100,
+                  width: 180,
+                  padding: 16,
+                  background: '#a5b4fc',
+                  borderRadius: 4,
+                  color: '#1e293b',
+                  fontSize: 12,
+                  fontWeight: 500,
+                  transform: 'rotate(2deg)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                }}>
+                  <div style={{ fontSize: 10, color: '#6366f1', fontWeight: 700, marginBottom: 6 }}>✨ AI ASSISTANT</div>
+                  "Generated 5 new layout ideas based on your sketch."
+                </div>
+
+                {/* Cursor indicator */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: 100,
+                  left: '40%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6
+                }}>
+                  <div style={{ width: 4, height: 4, background: '#22c55e', borderRadius: '50%' }} />
+                  <span style={{ fontSize: 11, color: '#22c55e' }}>Sarah is typing...</span>
+                </div>
               </div>
             </div>
           </div>
@@ -282,83 +342,153 @@ export function LandingPage({ onGetStarted, onLogin, onPricing }: LandingPagePro
       </section>
 
       {/* Features Section */}
-      <section style={{ padding: '80px 24px', background: '#fff' }}>
+      <section ref={featuresRef} id="features" style={{ padding: '80px 24px', background: '#0f0f14' }}>
         <div style={{ maxWidth: 1000, margin: '0 auto' }}>
           <h2 style={{
             fontSize: 32,
             fontWeight: 700,
             textAlign: 'center',
-            color: '#0f172a',
+            marginBottom: 12
+          }}>
+            Supercharge your workflow
+          </h2>
+          <p style={{
+            textAlign: 'center',
+            color: '#64748b',
             marginBottom: 48
           }}>
-            Everything you need for creative collaboration
-          </h2>
+            Everything you need to go from idea to execution.
+          </p>
 
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: 32
+            gap: 20
           }}>
             <FeatureCard
-              icon={<Sparkles size={24} />}
-              title="AI-Powered Notes"
-              description="Generate brainstorming ideas instantly with AI. Just describe your topic and get smart suggestions."
+              icon={<RefreshCw size={22} />}
+              title="Real-time Sync"
+              description="Zero-latency synchronization across all devices. See cursors, edits, and ideas move in real-time as your team builds."
             />
             <FeatureCard
-              icon={<Users size={24} />}
-              title="Real-Time Collaboration"
-              description="See teammates' cursors and changes live. Work together seamlessly, no matter where you are."
+              icon={<Sparkles size={22} />}
+              title="AI Brainstorming"
+              description="Stuck? Let our AI assistant generate nodes, cluster similar ideas, and summarize complex discussions into action items."
             />
             <FeatureCard
-              icon={<Zap size={24} />}
-              title="Instant Sync"
-              description="All changes sync automatically. No save button needed - your work is always up to date."
+              icon={<Layers size={22} />}
+              title="Unlimited Canvases"
+              description="No boundaries to your creativity. Create infinite boards for every project and organize them with powerful nesting."
             />
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section style={{
-        padding: '80px 24px',
-        background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-        textAlign: 'center'
-      }}>
-        <div style={{ maxWidth: 600, margin: '0 auto' }}>
-          <h2 style={{ fontSize: 32, fontWeight: 700, color: '#fff', marginBottom: 16 }}>
-            Ready to brainstorm?
+      <section ref={ctaRef} style={{ padding: '40px 24px 80px' }}>
+        <div style={{
+          maxWidth: 900,
+          margin: '0 auto',
+          background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%)',
+          borderRadius: 24,
+          padding: '60px 40px',
+          textAlign: 'center'
+        }}>
+          <h2 style={{ fontSize: 36, fontWeight: 700, marginBottom: 16 }}>
+            Ready to sync your team?
           </h2>
-          <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.8)', marginBottom: 32 }}>
-            Start collaborating with your team today. Free to get started.
+          <p style={{ fontSize: 16, opacity: 0.9, marginBottom: 32 }}>
+            Join teams who are building the future together on LiveSyncDesk.
           </p>
-          <button
-            onClick={onGetStarted}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              background: '#fff',
-              color: '#6366f1',
-              border: 'none',
-              padding: '14px 32px',
-              borderRadius: 12,
-              fontSize: 16,
-              fontWeight: 600,
-              cursor: 'pointer'
-            }}
-          >
-            Get Started Free <ArrowRight size={18} />
-          </button>
+          <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button
+              onClick={onGetStarted}
+              style={{
+                background: '#fff',
+                color: '#6366f1',
+                border: 'none',
+                padding: '14px 28px',
+                borderRadius: 10,
+                fontSize: 15,
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              Create your first board
+            </button>
+            <button
+              onClick={handleContact}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                background: 'transparent',
+                color: '#fff',
+                border: '1px solid rgba(255,255,255,0.4)',
+                padding: '14px 28px',
+                borderRadius: 10,
+                fontSize: 15,
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              <Mail size={18} /> Contact Us
+            </button>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
       <footer style={{
         padding: '40px 24px',
-        background: '#0f172a',
-        textAlign: 'center'
+        borderTop: '1px solid rgba(255,255,255,0.05)'
       }}>
-        <div style={{ color: '#64748b', fontSize: 14 }}>
+        <div style={{
+          maxWidth: 1000,
+          margin: '0 auto',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 24
+        }}>
+          <div 
+            onClick={scrollToTop}
+            style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
+          >
+            <div style={{
+              width: 28,
+              height: 28,
+              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+              borderRadius: 6,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 12
+            }}>
+              ✏️
+            </div>
+            <span style={{ fontSize: 14, fontWeight: 600 }}>LiveSyncDesk</span>
+          </div>
+
+          <div style={{ display: 'flex', gap: 24, fontSize: 13, color: '#64748b' }}>
+            <button onClick={onPricing} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}>Pricing</button>
+            <button onClick={scrollToFeatures} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}>Features</button>
+            <button onClick={handleContact} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}>Support</button>
+          </div>
+
+          <div style={{ display: 'flex', gap: 16 }}>
+            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" style={{ color: '#64748b' }}><Twitter size={20} /></a>
+            <a href="https://github.com/lijh1519/livesyncdesk" target="_blank" rel="noopener noreferrer" style={{ color: '#64748b' }}><Github size={20} /></a>
+          </div>
+        </div>
+        <div style={{
+          maxWidth: 1000,
+          margin: '24px auto 0',
+          textAlign: 'center',
+          color: '#475569',
+          fontSize: 13
+        }}>
           © 2025 LiveSyncDesk. All rights reserved.
         </div>
       </footer>
@@ -370,27 +500,27 @@ function FeatureCard({ icon, title, description }: { icon: React.ReactNode; titl
   return (
     <div style={{
       padding: 28,
-      background: '#f8fafc',
+      background: '#16161f',
       borderRadius: 16,
-      border: '1px solid #e2e8f0'
+      border: '1px solid rgba(255,255,255,0.05)'
     }}>
       <div style={{
-        width: 48,
-        height: 48,
-        background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-        borderRadius: 12,
+        width: 44,
+        height: 44,
+        background: 'rgba(99,102,241,0.15)',
+        borderRadius: 10,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        color: '#fff',
+        color: '#a5b4fc',
         marginBottom: 16
       }}>
         {icon}
       </div>
-      <h3 style={{ fontSize: 18, fontWeight: 600, color: '#0f172a', marginBottom: 8 }}>
+      <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>
         {title}
       </h3>
-      <p style={{ fontSize: 14, color: '#64748b', lineHeight: 1.6 }}>
+      <p style={{ fontSize: 14, color: '#94a3b8', lineHeight: 1.6 }}>
         {description}
       </p>
     </div>

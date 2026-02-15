@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Mail, Loader2 } from 'lucide-react';
+import { Mail, Loader2, ArrowLeft } from 'lucide-react';
 
-export function LoginPage() {
+interface LoginPageProps {
+  onBack?: () => void;
+}
+
+export function LoginPage({ onBack }: LoginPageProps) {
   const { signInWithGoogle, signInWithEmail, loading } = useAuth();
   const [email, setEmail] = useState('');
   const [emailSent, setEmailSent] = useState(false);
@@ -35,6 +39,14 @@ export function LoginPage() {
     }
   };
 
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      window.location.href = '/';
+    }
+  };
+
   if (loading) {
     return (
       <div style={{ 
@@ -42,9 +54,9 @@ export function LoginPage() {
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+        background: '#0a0a0f'
       }}>
-        <Loader2 size={32} color="#fff" className="animate-spin" />
+        <Loader2 size={32} color="#6366f1" className="animate-spin" />
       </div>
     );
   }
@@ -55,16 +67,37 @@ export function LoginPage() {
       display: 'flex', 
       alignItems: 'center', 
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: '#0a0a0f',
       padding: '20px'
     }}>
+      {/* Back Button */}
+      <button
+        onClick={handleBack}
+        style={{
+          position: 'absolute',
+          top: 24,
+          left: 24,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          background: 'transparent',
+          border: 'none',
+          color: '#94a3b8',
+          fontSize: 14,
+          cursor: 'pointer'
+        }}
+      >
+        <ArrowLeft size={18} /> Back to Home
+      </button>
+
       <div style={{
-        background: '#fff',
+        background: '#16161f',
         borderRadius: '24px',
         padding: '40px',
         width: '100%',
         maxWidth: '420px',
-        boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)'
+        boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
+        border: '1px solid rgba(255,255,255,0.08)'
       }}>
         {/* Logo & Title */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
@@ -81,10 +114,10 @@ export function LoginPage() {
           }}>
             ✏️
           </div>
-          <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#1e293b', margin: 0 }}>
+          <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#fff', margin: 0 }}>
             Welcome to LiveSyncDesk
           </h1>
-          <p style={{ color: '#64748b', marginTop: '8px', fontSize: '14px' }}>
+          <p style={{ color: '#94a3b8', marginTop: '8px', fontSize: '14px' }}>
             Real-time collaborative whiteboard
           </p>
         </div>
@@ -107,7 +140,7 @@ export function LoginPage() {
             <div style={{ 
               width: '64px', 
               height: '64px', 
-              background: '#ecfdf5', 
+              background: 'rgba(34,197,94,0.1)', 
               borderRadius: '50%',
               display: 'flex',
               alignItems: 'center',
@@ -117,18 +150,18 @@ export function LoginPage() {
             }}>
               ✉️
             </div>
-            <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#1e293b', marginBottom: '8px' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#fff', marginBottom: '8px' }}>
               Check your email
             </h2>
-            <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '20px' }}>
-              We sent a magic link to <strong>{email}</strong>
+            <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '20px' }}>
+              We sent a magic link to <strong style={{ color: '#a5b4fc' }}>{email}</strong>
             </p>
             <button
               onClick={() => setEmailSent(false)}
               style={{
                 background: 'transparent',
                 border: 'none',
-                color: '#6366f1',
+                color: '#a5b4fc',
                 cursor: 'pointer',
                 fontSize: '14px',
                 fontWeight: 500
@@ -150,7 +183,7 @@ export function LoginPage() {
                 gap: '12px',
                 padding: '14px 20px',
                 background: '#fff',
-                border: '1px solid #e2e8f0',
+                border: 'none',
                 borderRadius: '12px',
                 fontSize: '15px',
                 fontWeight: 500,
@@ -159,7 +192,7 @@ export function LoginPage() {
                 transition: 'all 0.2s',
                 marginBottom: '16px'
               }}
-              onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'}
+              onMouseOver={(e) => e.currentTarget.style.background = '#f1f5f9'}
               onMouseOut={(e) => e.currentTarget.style.background = '#fff'}
             >
               <svg width="20" height="20" viewBox="0 0 24 24">
@@ -176,12 +209,12 @@ export function LoginPage() {
               alignItems: 'center', 
               gap: '16px', 
               margin: '20px 0',
-              color: '#94a3b8',
+              color: '#64748b',
               fontSize: '13px'
             }}>
-              <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
+              <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.1)' }} />
               or
-              <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
+              <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.1)' }} />
             </div>
 
             {/* Email Magic Link */}
@@ -195,14 +228,16 @@ export function LoginPage() {
                   style={{
                     width: '100%',
                     padding: '14px 16px',
-                    border: '1px solid #e2e8f0',
+                    border: '1px solid rgba(255,255,255,0.1)',
                     borderRadius: '12px',
                     fontSize: '15px',
                     outline: 'none',
-                    boxSizing: 'border-box'
+                    boxSizing: 'border-box',
+                    background: 'rgba(255,255,255,0.05)',
+                    color: '#fff'
                   }}
                   onFocus={(e) => e.currentTarget.style.borderColor = '#6366f1'}
-                  onBlur={(e) => e.currentTarget.style.borderColor = '#e2e8f0'}
+                  onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
                 />
               </div>
               <button
@@ -239,7 +274,7 @@ export function LoginPage() {
         {/* Footer */}
         <p style={{ 
           textAlign: 'center', 
-          color: '#94a3b8', 
+          color: '#64748b', 
           fontSize: '12px', 
           marginTop: '24px' 
         }}>

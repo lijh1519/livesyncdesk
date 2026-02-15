@@ -448,12 +448,12 @@ function AuthenticatedApp() {
 
   // Login Page
   if (page === 'login' && !user) {
-    return <LoginPage />;
+    return <LoginPage onBack={() => navigate('landing')} />;
   }
 
   // App (requires login)
   if (!user) {
-    return <LoginPage />;
+    return <LoginPage onBack={() => navigate('landing')} />;
   }
 
   return (
