@@ -9,6 +9,8 @@ import { CanvasWrapper } from './components/CanvasWrapper';
 import { ToastProvider, useToast } from './components/Toast';
 import { AIGenerator } from './components/AIGenerator';
 import { LoginPage } from './components/LoginPage';
+import { LandingPage } from './components/LandingPage';
+import { PricingPage } from './components/PricingPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { User } from './types';
 import { nanoid } from 'nanoid';
@@ -332,13 +334,67 @@ function EditorContent({ roomId }: { roomId: string }) {
 }
 
 // 认证保护的应用内容
+type PageType = 'landing' | 'pricing' | 'login' | 'app';
+
 function AuthenticatedApp() {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading, signInWithGoogle } = useAuth();
+  const [page, setPage] = useState<PageType>('landing');
   
-  // 获取房间 ID（从 URL 或生成新 ID）
-  const roomId = useMemo(() => getRoomId(), []);
+  // 根据 URL path 初始化页面
+  useEffect(() => {
+    const path = window.location.pathname;
+    const hasRoom = window.location.search.includes('room=');
+    
+    if (path === '/pricing') {
+      setPage('pricing');
+    } else if (path === '/login') {
+      setPage('login');
+    } else if (path === '/app' || hasRoom) {
+      setPage('app');
+    } else {
+      setPage('landing');
+    }
+  }, []);
+
+  // 导航函数
+  const navigate = (newPage: PageType) => {
+    setPage(newPage);
+    if (newPage === 'landing') {
+      window.history.pushState({}, '', '/');
+    } else if (newPage === 'pricing') {
+      window.history.pushState({}, '', '/pricing');
+    } else if (newPage === 'login') {
+      window.history.pushState({}, '', '/login');
+    } else if (newPage === 'app') {
+      const roomId = nanoid(10);
+      window.history.pushState({}, '', `/?room=${roomId}`);
+    }
+  };
+
+  const handleGetStarted = () => {
+    if (user) {
+      navigate('app');
+    } else {
+      navigate('login');
+    }
+  };
+
+  const handleSelectPlan = (plan: 'free' | 'pro') => {
+    if (plan === 'pro') {
+      // 跳转到 LemonSqueezy 支付页面
+      window.open('https://lijiahua.lemonsqueezy.com/checkout/buy/85c8ea54-5dca-497d-8476-c0465b6c8de6', '_blank');
+    } else {
+      handleGetStarted();
+    }
+  };
   
-  // 生成稳定的用户信息（优先使用登录用户信息）
+  // 获取房间 ID
+  const roomId = useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('room') || nanoid(10);
+  }, [page]);
+  
+  // 生成稳定的用户信息
   const userInfo = useMemo(() => ({
     name: user?.user_metadata?.name || user?.email?.split('@')[0] || randomName(),
     color: randomColor(),
@@ -369,6 +425,33 @@ function AuthenticatedApp() {
     );
   }
 
+  // Landing Page
+  if (page === 'landing') {
+    return (
+      <LandingPage
+        onGetStarted={handleGetStarted}
+        onLogin={() => navigate('login')}
+        onPricing={() => navigate('pricing')}
+      />
+    );
+  }
+
+  // Pricing Page
+  if (page === 'pricing') {
+    return (
+      <PricingPage
+        onBack={() => navigate('landing')}
+        onSelectPlan={handleSelectPlan}
+      />
+    );
+  }
+
+  // Login Page
+  if (page === 'login' && !user) {
+    return <LoginPage />;
+  }
+
+  // App (requires login)
   if (!user) {
     return <LoginPage />;
   }
