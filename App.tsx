@@ -379,9 +379,12 @@ function AuthenticatedApp() {
     }
   };
 
-  const handleSelectPlan = (plan: 'free' | 'pro') => {
-    if (plan === 'pro') {
-      // 跳转到 LemonSqueezy 支付页面
+  const handleSelectPlan = (plan: 'free' | 'pro-monthly' | 'pro-yearly') => {
+    if (plan === 'pro-monthly') {
+      // TODO: 替换为 Paddle 链接
+      window.open('https://lijiahua.lemonsqueezy.com/checkout/buy/85c8ea54-5dca-497d-8476-c0465b6c8de6', '_blank');
+    } else if (plan === 'pro-yearly') {
+      // TODO: 替换为 Paddle 年付链接
       window.open('https://lijiahua.lemonsqueezy.com/checkout/buy/85c8ea54-5dca-497d-8476-c0465b6c8de6', '_blank');
     } else {
       handleGetStarted();

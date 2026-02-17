@@ -1,12 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Check, ArrowLeft, Sparkles, Zap } from 'lucide-react';
 
 interface PricingPageProps {
   onBack: () => void;
-  onSelectPlan: (plan: 'free' | 'pro') => void;
+  onSelectPlan: (plan: 'free' | 'pro-monthly' | 'pro-yearly') => void;
 }
 
 export function PricingPage({ onBack, onSelectPlan }: PricingPageProps) {
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+
+  const pricing = {
+    monthly: { price: 9, period: 'month', save: null },
+    yearly: { price: 90, period: 'year', save: '2 months free' }
+  };
+
+  const current = pricing[billingCycle];
+  const monthlyEquivalent = billingCycle === 'yearly' ? (current.price / 12).toFixed(1) : current.price;
+
   return (
     <div style={{ minHeight: '100vh', height: '100vh', overflow: 'auto', background: '#0a0a0f', color: '#fff', fontFamily: 'Inter, system-ui, sans-serif' }}>
       {/* Navigation */}
@@ -64,13 +74,64 @@ export function PricingPage({ onBack, onSelectPlan }: PricingPageProps) {
       {/* Pricing Content */}
       <section style={{ paddingTop: 120, paddingBottom: 80 }}>
         <div style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px' }}>
-          <div style={{ textAlign: 'center', marginBottom: 60 }}>
+          <div style={{ textAlign: 'center', marginBottom: 48 }}>
             <h1 style={{ fontSize: 40, fontWeight: 700, marginBottom: 12 }}>
               Simple, transparent pricing
             </h1>
-            <p style={{ fontSize: 18, color: '#94a3b8' }}>
+            <p style={{ fontSize: 18, color: '#94a3b8', marginBottom: 32 }}>
               Start free, upgrade when you need more
             </p>
+
+            {/* Billing Toggle */}
+            <div style={{
+              display: 'inline-flex',
+              background: '#16161f',
+              borderRadius: 12,
+              padding: 4,
+              border: '1px solid rgba(255,255,255,0.08)'
+            }}>
+              <button
+                onClick={() => setBillingCycle('monthly')}
+                style={{
+                  padding: '10px 24px',
+                  borderRadius: 8,
+                  border: 'none',
+                  fontSize: 14,
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  background: billingCycle === 'monthly' ? '#6366f1' : 'transparent',
+                  color: billingCycle === 'monthly' ? '#fff' : '#94a3b8'
+                }}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setBillingCycle('yearly')}
+                style={{
+                  padding: '10px 24px',
+                  borderRadius: 8,
+                  border: 'none',
+                  fontSize: 14,
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  background: billingCycle === 'yearly' ? '#6366f1' : 'transparent',
+                  color: billingCycle === 'yearly' ? '#fff' : '#94a3b8',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8
+                }}
+              >
+                Yearly
+                <span style={{
+                  background: '#22c55e',
+                  color: '#fff',
+                  fontSize: 11,
+                  padding: '2px 6px',
+                  borderRadius: 4,
+                  fontWeight: 600
+                }}>Save 17%</span>
+              </button>
+            </div>
           </div>
 
           <div style={{
@@ -174,17 +235,23 @@ export function PricingPage({ onBack, onSelectPlan }: PricingPageProps) {
                 <Zap size={14} /> Pro
               </div>
               
-              <div style={{ marginBottom: 24 }}>
-                <span style={{ fontSize: 48, fontWeight: 800, color: '#fff' }}>$9</span>
-                <span style={{ color: 'rgba(255,255,255,0.7)' }}>/month</span>
+              <div style={{ marginBottom: 8 }}>
+                <span style={{ fontSize: 48, fontWeight: 800, color: '#fff' }}>${current.price}</span>
+                <span style={{ color: 'rgba(255,255,255,0.7)' }}>/{current.period}</span>
               </div>
 
-              <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: 14, marginBottom: 24 }}>
+              {billingCycle === 'yearly' && (
+                <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, marginBottom: 16 }}>
+                  ${monthlyEquivalent}/month · <span style={{ color: '#fef08a' }}>{current.save}</span>
+                </p>
+              )}
+
+              <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: 14, marginBottom: 24, marginTop: billingCycle === 'monthly' ? 16 : 0 }}>
                 For professionals and teams
               </p>
 
               <button
-                onClick={() => onSelectPlan('pro')}
+                onClick={() => onSelectPlan(billingCycle === 'monthly' ? 'pro-monthly' : 'pro-yearly')}
                 style={{
                   width: '100%',
                   padding: '14px',
@@ -198,7 +265,7 @@ export function PricingPage({ onBack, onSelectPlan }: PricingPageProps) {
                   marginBottom: 24
                 }}
               >
-                Upgrade to Pro
+                {billingCycle === 'yearly' ? 'Get Pro Yearly' : 'Get Pro Monthly'}
               </button>
 
               <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
