@@ -23,6 +23,18 @@ function verifyPaddleSignature(payload: string, signature: string): boolean {
   );
 }
 
+// 记录 webhook 日志
+async function logWebhook(eventType: string, payload: any) {
+  try {
+    await supabase.from('webhook_logs').insert({
+      event_type: eventType,
+      payload: payload
+    });
+  } catch (e) {
+    console.error('Failed to log webhook:', e);
+  }
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -40,6 +52,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const event = req.body;
     const eventType = event.event_type;
     const data = event.data;
+
+    // 记录所有 webhook 到数据库
+    await logWebhook(eventType, event);
 
     console.log('Paddle webhook received:', eventType);
 
