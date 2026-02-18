@@ -414,7 +414,13 @@ function AuthenticatedApp() {
   };
 
   const handleSelectPlan = (plan: 'free' | 'pro-monthly' | 'pro-yearly') => {
-    const userEmail = user?.email || '';
+    // 未登录时跳转登录页
+    if (!user?.email) {
+      navigate('login');
+      return;
+    }
+    
+    const userEmail = user.email;
     
     if (plan === 'pro-monthly' && paddleReady) {
       window.Paddle.Checkout.open({
