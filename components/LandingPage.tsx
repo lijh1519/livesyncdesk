@@ -1,14 +1,17 @@
 import React, { useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { ArrowRight, RefreshCw, Sparkles, Layers, Twitter, Github, Mail } from 'lucide-react';
+import { UserMenu } from './UserMenu';
 
 interface LandingPageProps {
   onGetStarted: () => void;
   onLogin: () => void;
   onPricing: () => void;
+  onLogout: () => void;
+  isPro?: boolean;
 }
 
-export function LandingPage({ onGetStarted, onLogin, onPricing }: LandingPageProps) {
+export function LandingPage({ onGetStarted, onLogin, onPricing, onLogout, isPro = false }: LandingPageProps) {
   const { user } = useAuth();
   const featuresRef = useRef<HTMLElement>(null);
   const ctaRef = useRef<HTMLElement>(null);
@@ -118,37 +121,9 @@ export function LandingPage({ onGetStarted, onLogin, onPricing }: LandingPagePro
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               {user ? (
-                <button
-                  onClick={onGetStarted}
-                  style={{
-                    background: '#6366f1',
-                    color: '#fff',
-                    border: 'none',
-                    padding: '10px 20px',
-                    borderRadius: 8,
-                    fontSize: 14,
-                    fontWeight: 500,
-                    cursor: 'pointer'
-                  }}
-                >
-                  Go to App
-                </button>
-              ) : (
                 <>
                   <button
-                    onClick={onLogin}
-                    style={{
-                      background: 'transparent',
-                      border: 'none',
-                      color: '#fff',
-                      fontSize: 14,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Log in
-                  </button>
-                  <button
-                    onClick={onLogin}
+                    onClick={onGetStarted}
                     style={{
                       background: '#6366f1',
                       color: '#fff',
@@ -160,9 +135,23 @@ export function LandingPage({ onGetStarted, onLogin, onPricing }: LandingPagePro
                       cursor: 'pointer'
                     }}
                   >
-                    Sign up
+                    Go to App
                   </button>
+                  <UserMenu 
+                    user={{ 
+                      id: user.id, 
+                      name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User', 
+                      email: user.email, 
+                      avatarUrl: user.user_metadata?.avatar_url || '', 
+                      color: '#6366f1' 
+                    }}
+                    isPro={isPro}
+                    onLogin={onLogin}
+                    onLogout={onLogout}
+                  />
                 </>
+              ) : (
+                <UserMenu user={null} isPro={false} onLogin={onLogin} onLogout={onLogout} />
               )}
             </div>
           </div>

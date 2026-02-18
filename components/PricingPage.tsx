@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
 import { Check, ArrowLeft, Sparkles, Zap } from 'lucide-react';
+import { UserMenu } from './UserMenu';
+import { User } from '../types';
 
 interface PricingPageProps {
   onBack: () => void;
   onSelectPlan: (plan: 'free' | 'pro-monthly' | 'pro-yearly') => void;
+  user?: User | null;
+  isPro?: boolean;
+  onLogin: () => void;
+  onLogout: () => void;
 }
 
-export function PricingPage({ onBack, onSelectPlan }: PricingPageProps) {
+export function PricingPage({ onBack, onSelectPlan, user, isPro = false, onLogin, onLogout }: PricingPageProps) {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
 
   const pricing = {
@@ -36,38 +42,41 @@ export function PricingPage({ onBack, onSelectPlan }: PricingPageProps) {
           padding: '16px 24px',
           display: 'flex',
           alignItems: 'center',
-          gap: 16
+          justifyContent: 'space-between'
         }}>
-          <button
-            onClick={onBack}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              background: 'transparent',
-              border: 'none',
-              color: '#94a3b8',
-              fontSize: 14,
-              cursor: 'pointer'
-            }}
-          >
-            <ArrowLeft size={18} /> Back
-          </button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{
-              width: 32,
-              height: 32,
-              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-              borderRadius: 8,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 14
-            }}>
-              ✏️
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <button
+              onClick={onBack}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                background: 'transparent',
+                border: 'none',
+                color: '#94a3b8',
+                fontSize: 14,
+                cursor: 'pointer'
+              }}
+            >
+              <ArrowLeft size={18} /> Back
+            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{
+                width: 32,
+                height: 32,
+                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                borderRadius: 8,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 14
+              }}>
+                ✏️
+              </div>
+              <span style={{ fontSize: 16, fontWeight: 700 }}>LiveSyncDesk</span>
             </div>
-            <span style={{ fontSize: 16, fontWeight: 700 }}>LiveSyncDesk</span>
           </div>
+          <UserMenu user={user || null} isPro={isPro} onLogin={onLogin} onLogout={onLogout} />
         </div>
       </nav>
 

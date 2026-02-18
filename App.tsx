@@ -361,9 +361,26 @@ function EditorContent({ roomId }: { roomId: string }) {
 type PageType = 'landing' | 'pricing' | 'login' | 'app';
 
 function AuthenticatedApp() {
-  const { user, loading, signInWithGoogle } = useAuth();
+  const { user, loading, signInWithGoogle, signOut } = useAuth();
   const [page, setPage] = useState<PageType>('landing');
   const [paddleReady, setPaddleReady] = useState(false);
+  const [isPro, setIsPro] = useState(false);
+
+  // 查询用户订阅状态
+  useEffect(() => {
+    async function fetchSubscription() {
+      if (user?.email) {
+        try {
+          const { getUserSubscription } = await import('./services/subscription');
+          const sub = await getUserSubscription(user.email);
+          setIsPro(sub.status === 'pro');
+        } catch (e) {
+          console.error('Failed to fetch subscription:', e);
+        }
+      }
+    }
+    fetchSubscription();
+  }, [user?.email]);
 
   // 初始化 Paddle
   useEffect(() => {
@@ -483,6 +500,8 @@ function AuthenticatedApp() {
         onGetStarted={handleGetStarted}
         onLogin={() => navigate('login')}
         onPricing={() => navigate('pricing')}
+        onLogout={signOut}
+        isPro={isPro}
       />
     );
   }
@@ -493,6 +512,10 @@ function AuthenticatedApp() {
       <PricingPage
         onBack={() => navigate('landing')}
         onSelectPlan={handleSelectPlan}
+        user={user ? { id: user.id, name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User', email: user.email, avatarUrl: user.user_metadata?.avatar_url || '', color: '#6366f1' } : null}
+        isPro={isPro}
+        onLogin={() => navigate('login')}
+        onLogout={signOut}
       />
     );
   }
