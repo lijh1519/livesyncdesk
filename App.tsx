@@ -15,6 +15,26 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { User } from './types';
 import { nanoid } from 'nanoid';
 
+// Paddle 类型声明
+declare global {
+  interface Window {
+    Paddle: {
+      Environment: {
+        set: (env: 'sandbox' | 'production') => void;
+      };
+      Initialize: (options: { token: string }) => void;
+      Checkout: {
+        open: (options: { items: Array<{ priceId: string; quantity: number }> }) => void;
+      };
+    };
+  }
+}
+
+// Paddle 配置
+const PADDLE_CLIENT_TOKEN = 'test_2a2ba3a00ebfd69613223c4a84a';
+const PADDLE_PRICE_MONTHLY = 'pri_01khq7z06c3em7cd762fbk9pgf';
+const PADDLE_PRICE_YEARLY = 'pri_01khq8064yknf0m9afmw3xfgfv';
+
 // 随机用户颜色
 const COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#f97316', '#10b981', '#06b6d4'];
 const randomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
@@ -339,6 +359,16 @@ type PageType = 'landing' | 'pricing' | 'login' | 'app';
 function AuthenticatedApp() {
   const { user, loading, signInWithGoogle } = useAuth();
   const [page, setPage] = useState<PageType>('landing');
+  const [paddleReady, setPaddleReady] = useState(false);
+
+  // 初始化 Paddle
+  useEffect(() => {
+    if (window.Paddle) {
+      window.Paddle.Environment.set('sandbox'); // 正式上线后改为 'production'
+      window.Paddle.Initialize({ token: PADDLE_CLIENT_TOKEN });
+      setPaddleReady(true);
+    }
+  }, []);
   
   // 根据 URL path 初始化页面
   useEffect(() => {
@@ -380,12 +410,14 @@ function AuthenticatedApp() {
   };
 
   const handleSelectPlan = (plan: 'free' | 'pro-monthly' | 'pro-yearly') => {
-    if (plan === 'pro-monthly') {
-      // TODO: 替换为 Paddle 链接
-      window.open('https://lijiahua.lemonsqueezy.com/checkout/buy/85c8ea54-5dca-497d-8476-c0465b6c8de6', '_blank');
-    } else if (plan === 'pro-yearly') {
-      // TODO: 替换为 Paddle 年付链接
-      window.open('https://lijiahua.lemonsqueezy.com/checkout/buy/85c8ea54-5dca-497d-8476-c0465b6c8de6', '_blank');
+    if (plan === 'pro-monthly' && paddleReady) {
+      window.Paddle.Checkout.open({
+        items: [{ priceId: PADDLE_PRICE_MONTHLY, quantity: 1 }]
+      });
+    } else if (plan === 'pro-yearly' && paddleReady) {
+      window.Paddle.Checkout.open({
+        items: [{ priceId: PADDLE_PRICE_YEARLY, quantity: 1 }]
+      });
     } else {
       handleGetStarted();
     }
