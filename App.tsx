@@ -24,7 +24,11 @@ declare global {
       };
       Initialize: (options: { token: string }) => void;
       Checkout: {
-        open: (options: { items: Array<{ priceId: string; quantity: number }> }) => void;
+        open: (options: {
+          items: Array<{ priceId: string; quantity: number }>;
+          customData?: Record<string, string>;
+          customer?: { email?: string };
+        }) => void;
       };
     };
   }
@@ -410,13 +414,19 @@ function AuthenticatedApp() {
   };
 
   const handleSelectPlan = (plan: 'free' | 'pro-monthly' | 'pro-yearly') => {
+    const userEmail = user?.email || '';
+    
     if (plan === 'pro-monthly' && paddleReady) {
       window.Paddle.Checkout.open({
-        items: [{ priceId: PADDLE_PRICE_MONTHLY, quantity: 1 }]
+        items: [{ priceId: PADDLE_PRICE_MONTHLY, quantity: 1 }],
+        customData: { email: userEmail },
+        customer: { email: userEmail }
       });
     } else if (plan === 'pro-yearly' && paddleReady) {
       window.Paddle.Checkout.open({
-        items: [{ priceId: PADDLE_PRICE_YEARLY, quantity: 1 }]
+        items: [{ priceId: PADDLE_PRICE_YEARLY, quantity: 1 }],
+        customData: { email: userEmail },
+        customer: { email: userEmail }
       });
     } else {
       handleGetStarted();

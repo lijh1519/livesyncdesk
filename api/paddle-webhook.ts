@@ -62,7 +62,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       case 'subscription.created':
       case 'subscription.activated':
       case 'subscription.updated': {
-        const email = data.customer?.email;
+        // 从 custom_data 获取邮箱（前端 Checkout 时传入）
+        const email = data.custom_data?.email;
         const subscriptionId = data.id;
         const status = data.status; // active, canceled, past_due, paused
         const priceId = data.items?.[0]?.price?.id;
@@ -101,7 +102,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       case 'subscription.canceled':
       case 'subscription.paused': {
-        const email = data.customer?.email;
+        const email = data.custom_data?.email;
 
         if (email) {
           const { error } = await supabase
