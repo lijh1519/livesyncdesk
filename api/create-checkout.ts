@@ -25,6 +25,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ? 'https://live.dodopayments.com' 
       : 'https://test.dodopayments.com';
 
+    console.log('Checkout request:', { baseUrl, productId, email, env: DODO_ENV, hasApiKey: !!DODO_API_KEY });
+
     const response = await fetch(`${baseUrl}/checkouts`, {
       method: 'POST',
       headers: {
@@ -40,9 +42,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     if (!response.ok) {
-      const error = await response.text();
-      console.error('DodoPayments error:', error);
-      return res.status(500).json({ error: 'Failed to create checkout session' });
+      const errorText = await response.text();
+      console.error('DodoPayments error:', response.status, errorText);
+      return res.status(500).json({ 
+        error: 'Failed to create checkout session',
+        details: errorText,
+        status: response.status
+      });
     }
 
     const session = await response.json();
