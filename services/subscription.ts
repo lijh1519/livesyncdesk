@@ -9,7 +9,7 @@ export interface Subscription {
   currentPeriodEnd: string | null;
 }
 
-// 获取用户订阅状态
+// 获取用户订阅状态（查询所有订阅，只要有一个有效就算 Pro）
 export async function getUserSubscription(email: string): Promise<Subscription> {
   const defaultSubscription: Subscription = {
     status: 'free',
@@ -24,16 +24,19 @@ export async function getUserSubscription(email: string): Promise<Subscription> 
       .from('subscriptions')
       .select('status, plan, current_period_end')
       .eq('user_email', email)
-      .single();
+      .eq('status', 'pro')
+      .order('current_period_end', { ascending: false })
+      .limit(1);
 
-    if (error || !data) {
+    if (error || !data || data.length === 0) {
       return defaultSubscription;
     }
 
+    const subscription = data[0];
     return {
-      status: data.status === 'pro' ? 'pro' : 'free',
-      plan: data.plan as SubscriptionPlan,
-      currentPeriodEnd: data.current_period_end
+      status: 'pro',
+      plan: subscription.plan as SubscriptionPlan,
+      currentPeriodEnd: subscription.current_period_end
     };
   } catch (error) {
     console.error('Error fetching subscription:', error);
