@@ -11,6 +11,9 @@ import { AIGenerator } from './components/AIGenerator';
 import { LoginPage } from './components/LoginPage';
 import { LandingPage } from './components/LandingPage';
 import { PricingPage } from './components/PricingPage';
+import { TermsPage } from './components/TermsPage';
+import { PrivacyPage } from './components/PrivacyPage';
+import { RefundPage } from './components/RefundPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { User } from './types';
 import { nanoid } from 'nanoid';
@@ -359,7 +362,7 @@ function EditorContent({ roomId }: { roomId: string }) {
 }
 
 // 认证保护的应用内容
-type PageType = 'landing' | 'pricing' | 'login' | 'app';
+type PageType = 'landing' | 'pricing' | 'login' | 'app' | 'terms' | 'privacy' | 'refund';
 
 function AuthenticatedApp() {
   const { user, loading, signInWithGoogle, signOut } = useAuth();
@@ -401,6 +404,12 @@ function AuthenticatedApp() {
       setPage('pricing');
     } else if (path === '/login') {
       setPage('login');
+    } else if (path === '/terms') {
+      setPage('terms');
+    } else if (path === '/privacy') {
+      setPage('privacy');
+    } else if (path === '/refund') {
+      setPage('refund');
     } else if (path === '/app' || hasRoom) {
       setPage('app');
     } else {
@@ -417,6 +426,12 @@ function AuthenticatedApp() {
       window.history.pushState({}, '', '/pricing');
     } else if (newPage === 'login') {
       window.history.pushState({}, '', '/login');
+    } else if (newPage === 'terms') {
+      window.history.pushState({}, '', '/terms');
+    } else if (newPage === 'privacy') {
+      window.history.pushState({}, '', '/privacy');
+    } else if (newPage === 'refund') {
+      window.history.pushState({}, '', '/refund');
     } else if (newPage === 'app') {
       const roomId = nanoid(10);
       window.history.pushState({}, '', `/?room=${roomId}`);
@@ -521,6 +536,21 @@ function AuthenticatedApp() {
         onLogout={signOut}
       />
     );
+  }
+
+  // Terms Page
+  if (page === 'terms') {
+    return <TermsPage onBack={() => navigate('landing')} />;
+  }
+
+  // Privacy Page
+  if (page === 'privacy') {
+    return <PrivacyPage onBack={() => navigate('landing')} />;
+  }
+
+  // Refund Page
+  if (page === 'refund') {
+    return <RefundPage onBack={() => navigate('landing')} />;
   }
 
   // Login Page
