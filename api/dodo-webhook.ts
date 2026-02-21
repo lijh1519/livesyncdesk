@@ -41,7 +41,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       case 'subscription.renewed': {
         // 订阅激活或续费
         const email = data.customer?.email || data.metadata?.user_email;
-        const subscriptionId = data.subscription_id || data.id;
+        const subscriptionId = data.subscription_id;
         const productId = data.product_id;
 
         // 判断计划类型
@@ -52,7 +52,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             .from('subscriptions')
             .upsert({
               user_email: email,
-              subscription_id: subscriptionId,
+              paddle_subscription_id: subscriptionId, // 复用这个字段存 DodoPayments subscription_id
               status: 'pro',
               plan: plan,
               updated_at: new Date().toISOString()
