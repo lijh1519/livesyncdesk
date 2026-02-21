@@ -28,6 +28,7 @@ declare global {
           items: Array<{ priceId: string; quantity: number }>;
           customData?: Record<string, string>;
           customer?: { email?: string };
+          settings?: { locale?: string };
         }) => void;
       };
     };
@@ -443,13 +444,15 @@ function AuthenticatedApp() {
       window.Paddle.Checkout.open({
         items: [{ priceId: PADDLE_PRICE_MONTHLY, quantity: 1 }],
         customData: { email: userEmail },
-        customer: { email: userEmail }
+        customer: { email: userEmail },
+        settings: { locale: 'en' }
       });
     } else if (plan === 'pro-yearly' && paddleReady) {
       window.Paddle.Checkout.open({
         items: [{ priceId: PADDLE_PRICE_YEARLY, quantity: 1 }],
         customData: { email: userEmail },
-        customer: { email: userEmail }
+        customer: { email: userEmail },
+        settings: { locale: 'en' }
       });
     } else {
       handleGetStarted();
