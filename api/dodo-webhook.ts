@@ -52,7 +52,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             .from('subscriptions')
             .upsert({
               user_email: email,
-              paddle_subscription_id: subscriptionId, // 复用这个字段存 DodoPayments subscription_id
+              subscription_id: subscriptionId,
               status: 'pro',
               plan: plan,
               updated_at: new Date().toISOString()
