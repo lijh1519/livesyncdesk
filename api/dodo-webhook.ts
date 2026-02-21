@@ -43,7 +43,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const email = data.customer?.email || data.metadata?.user_email;
         const subscriptionId = data.subscription_id;
         const productId = data.product_id;
-        const expiresAt = data.expires_at || data.next_billing_date;
+        const expiresAt = data.next_billing_date; // 使用下次计费日作为当前周期结束时间
 
         // 判断计划类型
         const plan = productId === PRODUCT_YEARLY ? 'pro-yearly' : 'pro-monthly';
