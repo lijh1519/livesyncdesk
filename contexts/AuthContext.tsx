@@ -58,6 +58,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    // 登出后跳转到首页
+    window.location.href = '/';
   };
 
   return (
