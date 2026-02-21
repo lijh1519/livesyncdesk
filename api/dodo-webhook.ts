@@ -6,8 +6,8 @@ const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-// DodoPayments Product IDs
-const PRODUCT_YEARLY = 'pdt_0NYxaqul2qgCyM8Ne7MZr';
+// DodoPayments Product IDs (Live Mode)
+const PRODUCT_YEARLY = 'pdt_0NYxwxd1aqzuRrxe2CNzv';
 
 // 记录 webhook 日志
 async function logWebhook(eventType: string, payload: any) {

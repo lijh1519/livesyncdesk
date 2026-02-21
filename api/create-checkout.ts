@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-// DodoPayments Product IDs
-const PRODUCT_MONTHLY = 'pdt_0NYxaJE6GunJ47aKjMyiu';
-const PRODUCT_YEARLY = 'pdt_0NYxaqul2qgCyM8Ne7MZr';
+// DodoPayments Product IDs (Live Mode)
+const PRODUCT_MONTHLY = 'pdt_0NYxwtAgGYt36lCwS6LXW';
+const PRODUCT_YEARLY = 'pdt_0NYxwxd1aqzuRrxe2CNzv';
 
 const DODO_API_KEY = process.env.DODO_PAYMENTS_API_KEY || '';
 const DODO_ENV = process.env.DODO_ENV || 'test_mode'; // 'test_mode' or 'live_mode'
