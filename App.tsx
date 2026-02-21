@@ -18,30 +18,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { User } from './types';
 import { nanoid } from 'nanoid';
 
-// Paddle 类型声明
-declare global {
-  interface Window {
-    Paddle: {
-      Environment: {
-        set: (env: 'sandbox' | 'production') => void;
-      };
-      Initialize: (options: { token: string }) => void;
-      Checkout: {
-        open: (options: {
-          items: Array<{ priceId: string; quantity: number }>;
-          customData?: Record<string, string>;
-          customer?: { email?: string };
-          settings?: { locale?: string };
-        }) => void;
-      };
-    };
-  }
-}
-
-// Paddle 配置
-const PADDLE_CLIENT_TOKEN = 'test_2a2ba3a00ebfd69613223c4a84a';
-const PADDLE_PRICE_MONTHLY = 'pri_01khq7z06c3em7cd762fbk9pgf';
-const PADDLE_PRICE_YEARLY = 'pri_01khq8064yknf0m9afmw3xfgfv';
+// DodoPayments - 使用后端 API 创建 Checkout Session
 
 // 随机用户颜色
 const COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#f97316', '#10b981', '#06b6d4'];
@@ -367,7 +344,7 @@ type PageType = 'landing' | 'pricing' | 'login' | 'app' | 'terms' | 'privacy' | 
 function AuthenticatedApp() {
   const { user, loading, signInWithGoogle, signOut } = useAuth();
   const [page, setPage] = useState<PageType>('landing');
-  const [paddleReady, setPaddleReady] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [isPro, setIsPro] = useState(false);
 
   // 查询用户订阅状态
@@ -385,15 +362,6 @@ function AuthenticatedApp() {
     }
     fetchSubscription();
   }, [user?.email]);
-
-  // 初始化 Paddle
-  useEffect(() => {
-    if (window.Paddle) {
-      window.Paddle.Environment.set('sandbox'); // 正式上线后改为 'production'
-      window.Paddle.Initialize({ token: PADDLE_CLIENT_TOKEN });
-      setPaddleReady(true);
-    }
-  }, []);
   
   // 根据 URL path 初始化页面
   useEffect(() => {
@@ -446,31 +414,44 @@ function AuthenticatedApp() {
     }
   };
 
-  const handleSelectPlan = (plan: 'free' | 'pro-monthly' | 'pro-yearly') => {
+  const handleSelectPlan = async (plan: 'free' | 'pro-monthly' | 'pro-yearly') => {
     // 未登录时跳转登录页
     if (!user?.email) {
       navigate('login');
       return;
     }
     
-    const userEmail = user.email;
-    
-    if (plan === 'pro-monthly' && paddleReady) {
-      window.Paddle.Checkout.open({
-        items: [{ priceId: PADDLE_PRICE_MONTHLY, quantity: 1 }],
-        customData: { email: userEmail },
-        customer: { email: userEmail },
-        settings: { locale: 'en' }
-      });
-    } else if (plan === 'pro-yearly' && paddleReady) {
-      window.Paddle.Checkout.open({
-        items: [{ priceId: PADDLE_PRICE_YEARLY, quantity: 1 }],
-        customData: { email: userEmail },
-        customer: { email: userEmail },
-        settings: { locale: 'en' }
-      });
-    } else {
+    if (plan === 'free') {
       handleGetStarted();
+      return;
+    }
+    
+    // DodoPayments Checkout
+    setCheckoutLoading(true);
+    try {
+      const response = await fetch('/api/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: user.email,
+          plan: plan === 'pro-yearly' ? 'yearly' : 'monthly',
+          returnUrl: window.location.origin + '/pricing?success=true'
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.checkout_url) {
+        window.location.href = data.checkout_url;
+      } else {
+        console.error('No checkout URL returned');
+        alert('Failed to create checkout. Please try again.');
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      alert('Failed to create checkout. Please try again.');
+    } finally {
+      setCheckoutLoading(false);
     }
   };
   
