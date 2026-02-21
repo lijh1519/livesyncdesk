@@ -367,6 +367,14 @@ function AuthenticatedApp() {
   useEffect(() => {
     const path = window.location.pathname;
     const hasRoom = window.location.search.includes('room=');
+    const hash = window.location.hash;
+    
+    // 如果用户已登录且在 /login 页面，跳转到首页
+    if (user && (path === '/login' || hash.includes('access_token'))) {
+      window.history.replaceState({}, '', '/');
+      setPage('landing');
+      return;
+    }
     
     if (path === '/pricing') {
       setPage('pricing');
@@ -383,7 +391,7 @@ function AuthenticatedApp() {
     } else {
       setPage('landing');
     }
-  }, []);
+  }, [user]);
 
   // 导航函数
   const navigate = (newPage: PageType) => {
