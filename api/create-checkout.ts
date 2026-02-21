@@ -22,7 +22,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const productId = plan === 'yearly' ? PRODUCT_YEARLY : PRODUCT_MONTHLY;
     
     const baseUrl = DODO_ENV === 'live_mode' 
-      ? 'https://api.dodopayments.com' 
+      ? 'https://live.dodopayments.com' 
       : 'https://test.dodopayments.com';
 
     const response = await fetch(`${baseUrl}/checkouts`, {
