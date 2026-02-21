@@ -9,10 +9,11 @@
 1. [技术栈概览](#1-技术栈概览)
 2. [Supabase 登录验证](#2-supabase-登录验证)
 3. [Paddle 支付集成](#3-paddle-支付集成)
-4. [Vercel 部署配置](#4-vercel-部署配置)
-5. [环境变量清单](#5-环境变量清单)
-6. [数据库表结构](#6-数据库表结构)
-7. [常见问题排查](#7-常见问题排查)
+4. [Liveblocks 实时同步](#4-liveblocks-实时同步)
+5. [Vercel 部署配置](#5-vercel-部署配置)
+6. [环境变量清单](#6-环境变量清单)
+7. [数据库表结构](#7-数据库表结构)
+8. [常见问题排查](#8-常见问题排查)
 
 ---
 
@@ -24,6 +25,7 @@
 | 样式 | Tailwind CSS 4 | 原子化 CSS |
 | 认证 | Supabase Auth | Google OAuth + Magic Link |
 | 支付 | Paddle Billing | 订阅制支付，自动处理税务 |
+| 实时同步 | Liveblocks | 多人协作、光标同步、状态共享 |
 | 数据库 | Supabase PostgreSQL | 用户数据、订阅状态 |
 | 部署 | Vercel | 前端 + Serverless Functions |
 
@@ -485,9 +487,209 @@ export const PRO_LIMITS = {
 
 ---
 
-## 4. Vercel 部署配置
+## 4. Liveblocks 实时同步
 
-### 4.1 项目结构
+Liveblocks 提供实时多人协作能力，支持光标同步、状态共享、数据持久化。
+
+### 4.1 创建 Liveblocks 项目
+
+1. 访问 https://liveblocks.io 注册账号
+2. 创建新项目
+3. 获取 **Public Key**（格式：`pk_dev_xxx` 或 `pk_live_xxx`）
+
+### 4.2 安装依赖
+
+```bash
+npm install @liveblocks/client @liveblocks/react
+
+# 如果配合 Yjs 使用（如 tldraw）
+npm install @liveblocks/yjs yjs
+```
+
+### 4.3 配置文件
+
+**liveblocks.config.ts**：
+```typescript
+import { createClient } from "@liveblocks/client";
+import { createRoomContext } from "@liveblocks/react";
+
+// 创建 Liveblocks 客户端
+const client = createClient({
+  publicApiKey: import.meta.env.VITE_LIVEBLOCKS_PUBLIC_KEY,
+});
+
+// 定义 Presence 类型（用户实时状态，不持久化）
+type Presence = {
+  cursor: { x: number; y: number } | null;
+  name: string;
+  color: string;
+};
+
+// 定义 Storage 类型（持久化数据）
+type Storage = {
+  // 根据业务需求定义
+};
+
+// 定义用户元数据
+type UserMeta = {
+  id: string;
+  info: {
+    name: string;
+    color: string;
+    avatar?: string;
+  };
+};
+
+// 定义房间事件（广播）
+type RoomEvent = {
+  type: "FOLLOW_USER";
+  userId: string;
+};
+
+// 导出类型化的 hooks
+export const {
+  RoomProvider,
+  useRoom,
+  useMyPresence,
+  useUpdateMyPresence,
+  useOthers,
+  useOthersMapped,
+  useSelf,
+  useStorage,
+  useMutation,
+  useBroadcastEvent,
+  useEventListener,
+  useStatus,
+} = createRoomContext<Presence, Storage, UserMeta, RoomEvent>(client);
+```
+
+### 4.4 使用方式
+
+**包裹 RoomProvider**：
+```typescript
+import { RoomProvider } from './liveblocks.config';
+
+function App() {
+  const roomId = 'my-room-id'; // 每个房间唯一 ID
+  
+  return (
+    <RoomProvider
+      id={roomId}
+      initialPresence={{
+        cursor: null,
+        name: userName,
+        color: userColor,
+      }}
+      initialStorage={{}}
+    >
+      <CollaborativeCanvas />
+    </RoomProvider>
+  );
+}
+```
+
+**使用 Hooks**：
+```typescript
+import { useOthers, useMyPresence, useUpdateMyPresence, useStatus } from './liveblocks.config';
+
+function CollaborativeCanvas() {
+  // 获取其他用户
+  const others = useOthers();
+  
+  // 获取连接状态
+  const status = useStatus(); // 'connecting' | 'connected' | 'reconnecting' | 'disconnected'
+  
+  // 更新自己的 Presence
+  const updateMyPresence = useUpdateMyPresence();
+  
+  const handleMouseMove = (e: MouseEvent) => {
+    updateMyPresence({
+      cursor: { x: e.clientX, y: e.clientY }
+    });
+  };
+  
+  return (
+    <div onMouseMove={handleMouseMove}>
+      {/* 显示其他用户光标 */}
+      {others.map(({ connectionId, presence }) => (
+        presence.cursor && (
+          <Cursor
+            key={connectionId}
+            x={presence.cursor.x}
+            y={presence.cursor.y}
+            name={presence.name}
+            color={presence.color}
+          />
+        )
+      ))}
+    </div>
+  );
+}
+```
+
+### 4.5 连接状态指示器
+
+```typescript
+function ConnectionStatus() {
+  const status = useStatus();
+  
+  const statusConfig = {
+    initial: { color: 'bg-gray-400', text: '初始化...' },
+    connecting: { color: 'bg-yellow-500', text: '连接中...' },
+    connected: { color: 'bg-green-500', text: '已连接' },
+    reconnecting: { color: 'bg-yellow-500', text: '重连中...' },
+    disconnected: { color: 'bg-red-500', text: '已断开' },
+  };
+  
+  const config = statusConfig[status];
+  
+  return (
+    <div className="flex items-center gap-1.5">
+      <span className={`w-2 h-2 rounded-full ${config.color}`} />
+      <span>{config.text}</span>
+    </div>
+  );
+}
+```
+
+### 4.6 配合 tldraw 使用
+
+```typescript
+import { useSyncStore } from '@tldraw/sync';
+import { useRoom } from './liveblocks.config';
+import * as Y from 'yjs';
+import { LiveblocksYjsProvider } from '@liveblocks/yjs';
+
+function useYjsStore() {
+  const room = useRoom();
+  
+  return useMemo(() => {
+    const yDoc = new Y.Doc();
+    const yProvider = new LiveblocksYjsProvider(room, yDoc);
+    
+    return {
+      yDoc,
+      yProvider,
+    };
+  }, [room]);
+}
+```
+
+### 4.7 定价
+
+| Plan | 价格 | MAU | 并发连接 |
+|------|------|-----|----------|
+| Free | $0 | 300 | 20 |
+| Starter | $25/月 | 10K | 100 |
+| Pro | $99/月 | 100K | 500 |
+
+> MAU = Monthly Active Users（月活用户）
+
+---
+
+## 5. Vercel 部署配置
+
+### 5.1 项目结构
 
 ```
 project/
@@ -498,7 +700,7 @@ project/
 └── package.json
 ```
 
-### 4.2 环境变量配置
+### 5.2 环境变量配置
 
 **Vercel Dashboard** → Settings → Environment Variables：
 
@@ -506,17 +708,18 @@ project/
 |--------|-----|------|
 | `VITE_SUPABASE_URL` | `https://xxx.supabase.co` | All |
 | `VITE_SUPABASE_ANON_KEY` | `eyJxxx` | All |
+| `VITE_LIVEBLOCKS_PUBLIC_KEY` | `pk_dev_xxx` | All |
 | `SUPABASE_SERVICE_KEY` | `eyJxxx`（Service Role） | Production |
 | `PADDLE_WEBHOOK_SECRET` | `pdl_ntfset_xxx` | Production |
 
-### 4.3 API 路由
+### 5.3 API 路由
 
 Vercel 自动将 `/api` 目录下的文件映射为 Serverless Functions：
 - `api/paddle-webhook.ts` → `https://你的域名.com/api/paddle-webhook`
 
 ---
 
-## 5. 环境变量清单
+## 6. 环境变量清单
 
 **.env.example**：
 ```bash
@@ -537,9 +740,9 @@ VITE_OPENROUTER_API_KEY=sk-or-v1-xxx
 
 ---
 
-## 6. 数据库表结构
+## 7. 数据库表结构
 
-### 6.1 subscriptions 表
+### 7.1 subscriptions 表
 
 ```sql
 CREATE TABLE subscriptions (
@@ -558,7 +761,7 @@ CREATE INDEX idx_subscriptions_email ON subscriptions(user_email);
 CREATE INDEX idx_subscriptions_status ON subscriptions(status);
 ```
 
-### 6.2 webhook_logs 表（调试用）
+### 7.2 webhook_logs 表（调试用）
 
 ```sql
 CREATE TABLE webhook_logs (
@@ -572,7 +775,7 @@ CREATE TABLE webhook_logs (
 -- DELETE FROM webhook_logs WHERE created_at < NOW() - INTERVAL '30 days';
 ```
 
-### 6.3 RLS 策略
+### 7.3 RLS 策略
 
 ```sql
 -- 允许服务端完全访问
@@ -588,9 +791,9 @@ CREATE POLICY "Users can read own subscription"
 
 ---
 
-## 7. 常见问题排查
+## 8. 常见问题排查
 
-### 7.1 Paddle Checkout 报错 "Something went wrong"
+### 8.1 Paddle Checkout 报错 "Something went wrong"
 
 **原因**：域名未添加到 Paddle 白名单
 
@@ -599,7 +802,7 @@ CREATE POLICY "Users can read own subscription"
 2. 添加你的域名（如 `xxx.vercel.app`）
 3. 等待审核通过（通常几分钟）
 
-### 7.2 Paddle Checkout 显示中文
+### 8.2 Paddle Checkout 显示中文
 
 **原因**：Paddle 根据浏览器语言自动本地化
 
@@ -611,7 +814,7 @@ window.Paddle.Checkout.open({
 });
 ```
 
-### 7.3 Webhook 收到但 subscriptions 表无数据
+### 8.3 Webhook 收到但 subscriptions 表无数据
 
 **原因**：Paddle V2 Billing API 的 webhook 不包含 `customer.email`，只有 `customer_id`
 
@@ -626,7 +829,7 @@ window.Paddle.Checkout.open({
 
 Webhook 中从 `data.custom_data.email` 读取。
 
-### 7.4 报错 "customer ID or email is required"
+### 8.4 报错 "customer ID or email is required"
 
 **原因**：用户未登录就点击订阅按钮
 
@@ -641,7 +844,7 @@ const handleSubscribe = () => {
 };
 ```
 
-### 7.5 Google 登录后跳转到空白页
+### 8.5 Google 登录后跳转到空白页
 
 **原因**：Supabase URL Configuration 未配置正确的重定向地址
 
@@ -649,7 +852,7 @@ const handleSubscribe = () => {
 1. Supabase → Authentication → URL Configuration
 2. 添加所有可能的回调地址到 Redirect URLs
 
-### 7.6 Vercel Serverless Function 超时
+### 8.6 Vercel Serverless Function 超时
 
 **原因**：默认超时 10 秒，复杂操作可能超时
 
