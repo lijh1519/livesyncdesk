@@ -87,11 +87,12 @@ function LiveAvatarGroup() {
 }
 
 // 主编辑器内容
-function EditorContent({ roomId }: { roomId: string }) {
+function EditorContent({ roomId, isPro, navigate }: { roomId: string; isPro: boolean; navigate: (page: PageType) => void }) {
   const [activeTool, setActiveTool] = useState('select');
   const [editor, setEditor] = useState<Editor | null>(null);
   const [copied, setCopied] = useState(false);
   const [showAIGenerator, setShowAIGenerator] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const { showToast } = useToast();
   const { user, signOut } = useAuth();
   const others = useOthers();
@@ -295,20 +296,109 @@ function EditorContent({ roomId }: { roomId: string }) {
             <span>{copied ? 'Copied!' : 'Share'}</span>
           </button>
 
-          {/* User Avatar & Logout */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <img 
-              src={user?.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/thumbs/svg?seed=${user?.id}`}
-              alt="avatar"
-              style={{ width: 36, height: 36, borderRadius: '50%', border: '2px solid #fff', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
-            />
+          {/* User Avatar & Menu */}
+          <div style={{ position: 'relative' }}>
             <button
-              onClick={signOut}
-              title="Logout"
-              style={{ background: '#f1f5f9', border: 'none', padding: '8px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
             >
-              <LogOut size={16} color="#64748b" />
+              <img 
+                src={user?.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/thumbs/svg?seed=${user?.id}`}
+                alt="avatar"
+                style={{ width: 36, height: 36, borderRadius: '50%', border: '2px solid #fff', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+              />
             </button>
+            
+            {/* Dropdown Menu */}
+            {showUserMenu && (
+              <div 
+                style={{ 
+                  position: 'absolute', 
+                  top: '100%', 
+                  right: 0, 
+                  marginTop: '8px',
+                  background: 'white', 
+                  borderRadius: '12px', 
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.15)', 
+                  minWidth: '220px',
+                  zIndex: 100,
+                  overflow: 'hidden'
+                }}
+              >
+                {/* User Info */}
+                <div style={{ padding: '16px', borderBottom: '1px solid #f1f5f9' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <img 
+                      src={user?.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/thumbs/svg?seed=${user?.id}`}
+                      alt="avatar"
+                      style={{ width: 40, height: 40, borderRadius: '50%' }}
+                    />
+                    <div>
+                      <div style={{ fontWeight: 600, color: '#1e293b', fontSize: '14px' }}>
+                        {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#64748b' }}>
+                        {user?.email}
+                      </div>
+                    </div>
+                  </div>
+                  {isPro && (
+                    <div style={{ marginTop: '8px', display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'linear-gradient(135deg, #8b5cf6, #6366f1)', color: 'white', padding: '4px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 600 }}>
+                      <span>✨</span> Pro Member
+                    </div>
+                  )}
+                </div>
+                
+                {/* Menu Items */}
+                <div style={{ padding: '8px' }}>
+                  <button
+                    onClick={() => { setShowUserMenu(false); navigate('pricing'); }}
+                    style={{ 
+                      width: '100%', 
+                      padding: '10px 12px', 
+                      background: 'transparent', 
+                      border: 'none', 
+                      borderRadius: '8px',
+                      textAlign: 'left', 
+                      cursor: 'pointer', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '10px',
+                      fontSize: '14px',
+                      color: '#374151'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <span style={{ fontSize: '16px' }}>💳</span>
+                    {isPro ? 'Manage Subscription' : 'Upgrade to Pro'}
+                  </button>
+                  
+                  <button
+                    onClick={() => { setShowUserMenu(false); signOut(); }}
+                    style={{ 
+                      width: '100%', 
+                      padding: '10px 12px', 
+                      background: 'transparent', 
+                      border: 'none', 
+                      borderRadius: '8px',
+                      textAlign: 'left', 
+                      cursor: 'pointer', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '10px',
+                      fontSize: '14px',
+                      color: '#ef4444'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = '#fef2f2'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <LogOut size={16} />
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -563,7 +653,7 @@ function AuthenticatedApp() {
         }}
         initialStorage={{}}
       >
-        <EditorContent roomId={roomId} />
+        <EditorContent roomId={roomId} isPro={isPro} navigate={navigate} />
       </RoomProvider>
     </ToastProvider>
   );
