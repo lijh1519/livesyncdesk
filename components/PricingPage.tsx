@@ -16,8 +16,8 @@ export function PricingPage({ onBack, onSelectPlan, user, isPro = false, onLogin
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
 
   const pricing = {
-    monthly: { price: 8, period: 'month', save: null },
-    yearly: { price: 79, period: 'year', save: '18% off' }
+    monthly: { price: 1, period: 'month', save: null },
+    yearly: { price: 10, period: 'year', save: '17% off' }
   };
 
   const current = pricing[billingCycle];
@@ -138,7 +138,7 @@ export function PricingPage({ onBack, onSelectPlan, user, isPro = false, onLogin
                   padding: '2px 6px',
                   borderRadius: 4,
                   fontWeight: 600
-                }}>Save 18%</span>
+                }}>Save 17%</span>
               </button>
             </div>
           </div>
