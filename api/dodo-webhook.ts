@@ -30,6 +30,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const event = req.body;
     const eventType = event.type;
     const data = event.data;
+    const businessId = event.business_id; // 用于判断产品归属
 
     // 记录所有 webhook 到数据库
     await logWebhook(eventType, event);
@@ -55,12 +56,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               user_email: email,
               subscription_id: subscriptionId,
               product_id: productId,
+              business_id: businessId,
               status: 'pro',
               plan: plan,
               current_period_end: expiresAt,
               updated_at: new Date().toISOString()
             }, {
-              onConflict: 'user_email,product_id'
+              onConflict: 'user_email,business_id'
             });
 
           if (error) {
@@ -68,7 +70,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             return res.status(500).json({ error: 'Database error' });
           }
 
-          console.log(`Subscription activated for ${email}, plan: ${plan}, expires: ${expiresAt}`);
+          console.log(`Subscription activated for ${email}, plan: ${plan}, business: ${businessId}`);
         }
         break;
       }
